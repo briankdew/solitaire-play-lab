@@ -2,6 +2,7 @@
 // (server.py), and shows Claude's questions. Without the server the page plays as usual and the
 // panel says it isn't recording.
 import { G, S, setupCode } from './shared.js';
+import { setReplayAvailable } from './replay.js';
 
 const P = window.LabPlays;
 
@@ -17,6 +18,7 @@ const qText = el('labQText');
 const answerEl = el('labAnswer');
 const answerMic = el('labAnswerMic');
 const answerSend = el('labAnswerSend');
+const shuffleEl = el('labShuffle');
 
 const QUESTION_POLL_MS = 2500;
 
@@ -31,12 +33,25 @@ let queue = Promise.resolve();
 
 /* ---------- sending ---------- */
 
-function send(event) {
+function send(event, onReply) {
   if (!recording || !game) return;
   const body = JSON.stringify({ game: game.id, event });
   queue = queue.then(() => fetch('/api/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }))
-    .then((r) => { if (!r.ok) throw new Error(r.status); })
+    .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then((reply) => { if (onReply) onReply(reply); })
     .catch(() => setStatus(false, 'Recording failed: is ./play still running?'));
+}
+
+/** The shuffle being played, under the Think aloud title. */
+function showShuffle(reply) {
+  if (!reply || !reply.shuffle) { shuffleEl.hidden = true; return; }
+  const times = reply.first_deal ? 'new' : `game ${reply.plays} of this shuffle`;
+  const mirror = reply.mirror_of && reply.mirror_of.length ? ` · mirror of ${reply.mirror_of[0]}` : '';
+  shuffleEl.innerHTML = '';
+  const b = document.createElement('b');
+  b.textContent = reply.shuffle;
+  shuffleEl.append('Shuffle ', b, ` · ${times}${mirror}`);
+  shuffleEl.hidden = false;
 }
 
 function takeNote() {
@@ -87,7 +102,8 @@ export function onDeal(state, deck) {
     view: P.describe(state),
     plays: playsOf(state),
     note: takeNote(),
-  });
+  }, showShuffle);
+  shuffleEl.hidden = true;
   showStatus();
 }
 
@@ -255,6 +271,7 @@ function speech(button, box) {
 
 function setStatus(on, message) {
   recording = on;
+  setReplayAvailable(on);
   panel.classList.toggle('off', !on);
   statusEl.textContent = message || (on ? (game ? 'Recording' : 'Ready to record') : 'Not recording');
 }

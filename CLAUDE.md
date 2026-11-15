@@ -13,7 +13,8 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 - The player runs `./play` (server.py, port 8000) and plays in Chrome. Every action is logged to `games/<game-id>.jsonl`.
 - In Claude Code, `/play` follows the game live and `/review` goes over a finished game. The command files are in `.claude/commands/`.
 - **Claude never coaches during play.** Don't suggest plays, evaluate a position aloud, or hint at hidden cards. Advice would change the data being collected.
-- **Never read hidden information during play.** The `deck` field of a log's deal event holds the shuffle. Read logs only through `tools/watch.py`, which leaves it out. Replaying a game from its deck (`lab/log.js`) is for finished games only.
+- **Never read hidden information during play.** The `deck` field of a log's deal event, and `games/index.jsonl`, hold shuffles. Read logs only through `tools/watch.py`, which leaves them out. Replaying a game from its deck (`lab/log.js`) is for finished games only.
+- **Replays.** A shuffle can be dealt again from **Played shuffles**; watch.py marks the deal `REPLAY`. While a replay is in play, don't read or mention earlier games of that shuffle.
 
 ## Question rules
 - **Ask when:**
@@ -39,7 +40,8 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | `lab/plays.js` | The plays available in a position and the visible position. Nothing judges or scores a play. |
 | `lab/log.js` | Reading logs and replaying a game (Node). |
 | `server.py`, `play` | The local server and its start script. |
-| `games/*.jsonl` | One file per deal. Events: `deal` (settings, hidden `deck`, `view`, `plays`), `move` / `turn` (`n`, `key`, `token`, `think_ms`, `view` before the play, `plays`, `choices`, `note`, `revealed`, `turned`, `auto`), `undo` (`undoes`), `note`, `answer`, `end` (`result` W / L / quit / abandoned). |
+| `shuffles.py`, `games/index.jsonl` | Shuffle IDs (`<setup>-<6-digit counter>-<12-hex fingerprint>`, e.g. `K473-000001-7f3a9c21d4e8`), mirror groups, and the index of played shuffles (holds deck orders). `python3 shuffles.py --rebuild` rebuilds the index from the game logs. |
+| `games/*.jsonl` | One file per deal. Events: `deal` (settings, hidden `deck`, `shuffle`, `mirror`, `first_deal`, `view`, `plays`), `move` / `turn` (`n`, `key`, `token`, `think_ms`, `view` before the play, `plays`, `choices`, `note`, `revealed`, `turned`, `auto`), `undo` (`undoes`), `note`, `answer`, `end` (`result` W / L / quit / abandoned). |
 | `live/question.json`, `live/answers.jsonl` | The question channel (not committed). |
 | `catalog/reasons.json` | The reason vocabulary, empty at the start and built from the player's words. |
 | `catalog/annotations.jsonl` | Claude's reading of each explained play. |
@@ -47,7 +49,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py` (what the games hold). |
 
 ## Tests
-- `npm test`: rule and lab tests (Node 18+).
+- `npm test`: rule and lab tests (Node 18+), then the shuffle-index tests (Python).
 - `npm run test:e2e`: browser tests, which start server.py on port 4319. If Playwright's browser isn't installed, set `PW_CHROMIUM` to a Chromium path.
 
 ## Changes

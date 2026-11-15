@@ -4,7 +4,7 @@
   "description": "Solitaire Play Lab: the n-Card Solitaire game with think-aloud recording, so Claude can learn how the player chooses plays.",
   "private": true,
   "scripts": {
-    "test": "node --test",
+    "test": "node --test && python3 -m unittest discover -s tests -p 'test_*.py'",
     "test:e2e": "playwright test",
     "start": "python3 server.py"
   },

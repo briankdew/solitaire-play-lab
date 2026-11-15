@@ -78,7 +78,7 @@ def current_game():
 
 def newest_game():
     try:
-        files = [f for f in os.listdir(GAMES) if f.endswith(".jsonl")]
+        files = [f for f in os.listdir(GAMES) if f.endswith(".jsonl") and f != "index.jsonl"]
     except OSError:
         return None
     if not files:
@@ -89,7 +89,7 @@ def newest_game():
 
 def all_games():
     try:
-        return sorted(f[:-6] for f in os.listdir(GAMES) if f.endswith(".jsonl"))
+        return sorted(f[:-6] for f in os.listdir(GAMES) if f.endswith(".jsonl") and f != "index.jsonl")
     except OSError:
         return []
 

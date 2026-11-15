@@ -9,6 +9,11 @@ Standard library only. Besides serving the page, it has a small API used by ui/l
     POST /api/event      {"game": id, "event": {...}}  -> one line in games/<id>.jsonl
     GET  /api/question   the open question from Claude (live/question.json), or {}
     POST /api/answer     {"id": question id, "text": ...} -> live/answers.jsonl and the game log
+    GET  /api/setups     {setup: number of shuffles played}
+    GET  /api/shuffles   ?setup=K473&q=&offset=0&limit=50: played shuffles, newest first (no cards)
+    GET  /api/shuffle    ?id=K473-000001-7f3a9c21d4e8: one shuffle with its deck order, to replay it
+
+A deal event gets its shuffle's ID (see shuffles.py) before it is written, and the reply carries it.
 
 Claude writes questions with tools/ask.py and reads the logs with tools/watch.py.
 """
@@ -20,14 +25,17 @@ import sys
 import threading
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlsplit
+
+import shuffles
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-GAMES = LIVE = QUESTION = ANSWERS = CURRENT = None  # set by use_data_dir()
+GAMES = LIVE = QUESTION = ANSWERS = CURRENT = INDEX = None  # set by use_data_dir()
 
 
 def use_data_dir(data):
     """Where games/ and live/ go: the repository by default (--data for tests)."""
-    global GAMES, LIVE, QUESTION, ANSWERS, CURRENT
+    global GAMES, LIVE, QUESTION, ANSWERS, CURRENT, INDEX
     GAMES = os.path.join(data, "games")
     LIVE = os.path.join(data, "live")
     QUESTION = os.path.join(LIVE, "question.json")
@@ -35,6 +43,11 @@ def use_data_dir(data):
     CURRENT = os.path.join(LIVE, "current.json")
     os.makedirs(GAMES, exist_ok=True)
     os.makedirs(LIVE, exist_ok=True)
+    index_path = os.path.join(GAMES, "index.jsonl")
+    has_games = any(f.endswith(".jsonl") and f != "index.jsonl" for f in os.listdir(GAMES))
+    if has_games and not os.path.exists(index_path):
+        shuffles.rebuild(GAMES)
+    INDEX = shuffles.Index(index_path)
 
 GAME_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$")
 MAX_BODY = 1_000_000
@@ -98,7 +111,25 @@ class Handler(SimpleHTTPRequestHandler):
         return json.loads(self.rfile.read(length).decode("utf-8"))
 
     def do_GET(self):
-        path = self.path.split("?", 1)[0]
+        url = urlsplit(self.path)
+        path = url.path
+        args = {k: v[0] for k, v in parse_qs(url.query).items()}
+        if path == "/api/setups":
+            with lock:
+                return self.send_json(INDEX.setups())
+        if path == "/api/shuffles":
+            try:
+                offset, limit = max(0, int(args.get("offset", 0))), min(500, max(1, int(args.get("limit", 50))))
+            except ValueError:
+                return self.send_json({"error": "bad offset or limit"}, 400)
+            with lock:
+                return self.send_json(INDEX.listing(args.get("setup"), args.get("q", ""), offset, limit))
+        if path == "/api/shuffle":
+            with lock:
+                rec = INDEX.get(args.get("id", ""))
+                if not rec:
+                    return self.send_json({"error": "no such shuffle"}, 404)
+                return self.send_json({**INDEX.summary(rec), "deck": rec["deck"]})
         if path == "/api/status":
             return self.send_json({"recording": True})
         if path == "/api/question":
@@ -126,15 +157,26 @@ class Handler(SimpleHTTPRequestHandler):
 
     def event(self, data):
         game, event = data.get("game"), data.get("event")
-        if not isinstance(game, str) or not GAME_ID.match(game) or not isinstance(event, dict):
+        if not isinstance(game, str) or not GAME_ID.match(game) or game == "index" or not isinstance(event, dict):
             return self.send_json({"error": "bad event"}, 400)
         event.setdefault("t", now())
         file = os.path.join(GAMES, game + ".jsonl")
+        reply = {"ok": True}
         with lock:
+            deck, setup = event.get("deck"), event.get("setup")
+            if event.get("type") == "deal" and isinstance(deck, list) and isinstance(setup, str):
+                rec, first = INDEX.deal(game, setup, deck, event["t"])
+                event["shuffle"] = rec["id"]
+                event["mirror"] = rec["mirror"]
+                event["first_deal"] = first
+                reply.update({"shuffle": rec["id"], "first_deal": first, "plays": rec["stats"]["plays"],
+                              "mirror_of": INDEX.mirror_of(rec)})
             append_line(file, event)
             if event.get("type") == "deal":
                 write_json(CURRENT, {"game": game, "file": os.path.relpath(file, os.path.dirname(GAMES)), "started": event["t"]})
-        return self.send_json({"ok": True})
+            if event.get("type") == "end":
+                INDEX.end(game, event.get("result"), event.get("moves"), event["t"])
+        return self.send_json(reply)
 
     def answer(self, data):
         text = data.get("text")

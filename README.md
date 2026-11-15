@@ -51,7 +51,9 @@ Python 3 is already part of Chromebook Linux. The game and server need nothing e
    - **Claude's questions** appear in the gold box above the note. Answer there or in the terminal, whenever suits you; the game never waits.
    - **Microphone:** Chrome asks for permission the first time you press Speak. Speech recognition needs an internet connection. ChromeOS dictation (Search + D) and typing always work.
 
-4. **After a game:** `/review` goes over it with you, fills the gaps and saves a summary. Claude commits and pushes the games and the catalog, so GitHub keeps everything.
+4. **Replay a shuffle:** **Played shuffles** lists every shuffle you've dealt, for one setup at a time, newest first. Each has an ID like `K473-000001-7f3a9c21d4e8`: the setup, a 6-digit counter of that setup's shuffles, and a fingerprint of the card order that shows no cards. Find one by its counter or part of its ID and choose **Replay**. A replayed shuffle keeps its ID, and the list shows how often you've played it, how those games ended, and whether it's a mirror of another shuffle (the same game with suits traded). The current shuffle's ID shows under Think aloud.
+
+5. **After a game:** `/review` goes over it with you, fills the gaps and saves a summary. Claude commits and pushes the games and the catalog, so GitHub keeps everything.
 
 ## What gets recorded
 

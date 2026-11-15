@@ -120,3 +120,36 @@ test.describe('think aloud', () => {
     expect(await recordText(page)).toContain('h');
   });
 });
+
+test.describe('played shuffles', () => {
+  test('a dealt shuffle gets an ID, is listed, and Replay deals it again under the same ID', async ({ page }) => {
+    await openApp(page);
+    await pickShuffle(page, SCREENSHOT_DEAL);
+    await deal(page);
+    const shuffleLine = page.locator('#labShuffle');
+    await expect(shuffleLine).toBeVisible();
+    const id = (await shuffleLine.locator('b').textContent()).trim();
+    expect(id).toMatch(/^4223-\d{6}-[0-9a-f]{12}$/);
+    await card(page, 'AS').click();
+    await settle(page);
+
+    await page.locator('#replayBtn').click();
+    await expect(page.locator('#replayModal')).toBeVisible();
+    await expect(page.locator('#replaySetup')).toHaveValue('4223');
+    const counter = String(Number(id.split('-')[1]));
+    await page.locator('#replaySearch').fill(counter);
+    const row = page.locator('.replay-row').filter({ hasText: id });
+    await expect(row).toHaveCount(1);
+    await expect(page.locator('#replayList')).not.toContainText('AS');   // no cards in the list
+    await row.locator('button').click();
+    await page.locator('#confirmContinue').click();   // a game is in play: confirm ending it
+    await settle(page);
+    await expect(page.locator('#replayModal')).toBeHidden();
+    await expect(shuffleLine.locator('b')).toHaveText(id);
+    await expect(shuffleLine).toContainText('game');
+    await expect(card(page, 'AS')).toBeVisible();
+
+    const events = await eventsOf(page, 1);
+    expect(events[0]).toMatchObject({ type: 'deal', shuffle: id, first_deal: false });
+  });
+});

@@ -140,6 +140,13 @@ async function onSettingsChange() {
 }
 [highestSel, columnsSel, suitsSel, drawSel].forEach((sel) => sel.addEventListener('change', onSettingsChange));
 
+/** Switch to these settings (for a replayed shuffle): remembered, and the menus updated. */
+export function applySettings(settings) {
+  S.settings = G.normalizeSettings(settings);
+  saveSettings();
+  syncSettingsUI();
+}
+
 // Choosing from the Shuffle menu: a listed deal, or Random for a new random shuffle.
 async function onShuffleChange() {
   if (S.busy) { syncShufflePicker(); return; }
