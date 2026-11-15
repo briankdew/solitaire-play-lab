@@ -72,7 +72,7 @@ body {
 @media (max-width: 1160px) {   /* below this the settings column no longer fits (allowing for a scrollbar) */
   .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 648px); grid-template-rows: auto auto auto; }
   .side-left { grid-row: 1 / span 3; justify-self: stretch; }
-  .side-left .lab { width: 100%; max-width: 36rem; justify-self: end; }
+  .side-left .lab, .side-left .toolbar { width: 100%; max-width: 36rem; justify-self: end; }
   .app > .top { justify-self: end; }   /* the heading stays above the play area as it moves right */
   .side-right { grid-column: 2; grid-row: 3; max-width: none; margin-left: 0; margin-top: 14px; }
 }
@@ -81,7 +81,7 @@ body {
   .layout { grid-template-columns: max-content minmax(0, 1fr); grid-template-rows: none; width: 100%; max-width: 648px; justify-self: center; }
   .layout > .status, .play { grid-column: 1 / -1; grid-row: auto; }
   .side-left { grid-column: 1; grid-row: 3; justify-self: start; margin-top: 14px; }
-  .side-left .lab { width: 18rem; max-width: none; justify-self: center; }
+  .side-left .lab, .side-left .toolbar { width: 18rem; max-width: none; justify-self: center; }
   .app > .top { justify-self: center; }
   .side-right { grid-column: 2; grid-row: 3; }
 }
@@ -89,7 +89,7 @@ body {
 @media (max-width: 440px) {
   .layout { grid-template-columns: minmax(0, 1fr); }
   .side-left { grid-column: 1; grid-row: 3; justify-self: stretch; margin-right: 0; }
-  .side-left .lab { width: 100%; }
+  .side-left .lab, .side-left .toolbar { width: 100%; }
   .side-right { grid-column: 1; grid-row: 4; margin-top: 14px; }
 }
 
@@ -121,7 +121,10 @@ body {
 /* The settings and the action buttons share one width: the setting names' column plus the menus'.
    The action buttons, one per row, stretch to it. */
 .controls { display: grid; gap: 22px; width: max-content; max-width: 100%; }
-.toolbar { display: grid; gap: 8px; }
+/* The game controls sit in the left column under Think aloud, as wide as it: compact buttons that
+   wrap and share each row. */
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px; width: 18rem; max-width: 100%; }
+.toolbar .btn { flex: 1 1 auto; font-size: 0.85rem; padding: 7px 10px; }
 .btn {
   font: 600 0.9rem/1 var(--font-ui);
   color: var(--ink);

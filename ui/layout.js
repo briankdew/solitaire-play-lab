@@ -1,4 +1,4 @@
-// Fitting the Game Record panel, the Undo button and the diagram toggle around the table at each page width.
+// Fitting the Game Recorder panel, the Undo button and the diagram toggle around the table at each page width.
 import { S } from './shared.js';
 import { board, copyRecordBtn, highestLabel, labPanel, labTitle, recordFrame, statusEl, stepsEl, tableWrap, undoBtn } from './dom.js';
 import { measureSteps, updateStacking } from './record.js';
