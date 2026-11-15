@@ -1,9 +1,11 @@
 # Solitaire Play Lab: working agreement
 
 ## Purpose
-The player plays Klondike-style solitaire here while explaining each decision, by voice or typing. Claude catalogs the reasons, asks a short question when a reason is unclear, and helps put into words any nuance that's hard to describe. The catalog becomes a play model that decides the way the player does. The first goal is a model **more reliable than pure naive play**: play any card that can be played, choosing at random when more than one can, and turn the stock only when no card can be played.
+The player plays Klondike-style solitaire here while explaining each decision, by voice or typing. Claude catalogs the reasons, asks a short question when a reason is unclear, and helps put into words any nuance that's hard to describe. The catalog becomes a play model that decides the way the player does.
 
-**Start from a clean slate.** The lab exists to define the player's terms and values from their own play. Bring in no factors, values or terms from earlier conversations or other repositories. Every reason code comes from the player's words and is adopted only with their agreement.
+**Start from a clean slate.** The lab exists to define the player's terms and values from their own play. Bring in no factors, values, terms, baselines (such as naive play or perfect play) or results from earlier conversations or other repositories. Every reason code comes from the player's words and is adopted only with their agreement. The data set is only the games played here.
+
+**Judgment marks.** The game marks some moves with chess-style judgments (`?` in the Game Record and at the start of a logged `token`). The player plans to develop this system; until they formalize it, don't use the marks in any analysis, question or summary.
 
 The player has played about 50,000 games by hand and leads the research. Follow their direction, keep comments to a minimum, and ask only to clarify. No personal details (such as an email address) in commits or files.
 
@@ -42,7 +44,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | `catalog/reasons.json` | The reason vocabulary, empty at the start and built from the player's words. |
 | `catalog/annotations.jsonl` | Claude's reading of each explained play. |
 | `catalog/reviews/` | One summary per reviewed game. |
-| `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py` (what the games hold), `benchmark.js` (win rates of pure naive play and of perfect information). |
+| `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py` (what the games hold). |
 
 ## Tests
 - `npm test`: rule and lab tests (Node 18+).

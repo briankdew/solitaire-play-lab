@@ -6,8 +6,7 @@
   "scripts": {
     "test": "node --test",
     "test:e2e": "playwright test",
-    "start": "python3 server.py",
-    "bench": "node tools/benchmark.js"
+    "start": "python3 server.py"
   },
   "engines": {
     "node": ">=18"

@@ -1,11 +1,11 @@
 # Solitaire Play Lab
 
-The n-Card Solitaire game (copied from solitaire-study), with think-aloud recording. You play and explain your choices by voice or typing. Claude, in a terminal beside the game, catalogs your reasons, asks a short question when a play isn't explained, and helps you put nuance into words. The aim is a play model that decides the way you do, starting with one more reliable than pure naive play.
+The n-Card Solitaire game (copied from solitaire-study), with think-aloud recording. You play and explain your choices by voice or typing. Claude, in a terminal beside the game, catalogs your reasons, asks a short question when a play isn't explained, and helps you put nuance into words. The aim is a play model that decides the way you do.
 
 ## Set up on a Chromebook (once)
 
 1. **Turn on Linux.** Settings → About ChromeOS → Developers → Linux development environment → Turn on. Then open the **Terminal** app and choose **penguin**.
-2. **Install git, Node (for tests and the benchmark) and the GitHub CLI:**
+2. **Install git, Node (for the tests) and the GitHub CLI:**
 
    ```bash
    sudo apt update && sudo apt install -y git nodejs npm gh
@@ -73,7 +73,6 @@ The lab starts from a clean slate: no values, factors or reason codes are built 
 |---|---|
 | `python3 tools/report.py` | What the finished games hold: decisions, how many are explained, and the reasons used |
 | `python3 tools/report.py --game ID --plays` | One game, play by play |
-| `node tools/benchmark.js 4223 --games 2000` | Win rates on the same shuffles for pure naive play and for perfect information (the ceiling) |
 | `python3 tools/watch.py --follow` | The live game, one line per event (what `/play` reads) |
 
 ## Tests

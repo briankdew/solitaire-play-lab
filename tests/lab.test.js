@@ -1,10 +1,9 @@
-// Play-lab plays, log replay and the naive player. Run with: npm test
+// Play-lab plays and log replay. Run with: npm test
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const G = require('../game.js');
 const P = require('../lab/plays.js');
 const L = require('../lab/log.js');
-const B = require('../tools/benchmark.js');
 
 const S4223 = { highest: 4, suits: 2, columns: 2, draw: 3 };
 const dealOf = (text, settings = S4223) =>
@@ -57,20 +56,4 @@ test('log replay: a game rebuilt from its keys reaches the same position, undos 
   assert.equal(r.won, true);
   assert.equal(r.steps.length, 10);
   assert.equal(L.actions(events).all.filter((x) => x.undone).length, 1);
-});
-
-test('benchmark: setup codes give the settings', () => {
-  assert.deepEqual(B.settingsOf('4223'), G.normalizeSettings(S4223));
-  assert.equal(B.settingsOf('K473').highest, 13);
-});
-
-test('benchmark: naive play turns the stock only when no card can be played', () => {
-  const s = dealOf(DEAL1);
-  assert.deepEqual(B.naive(s, P.plays(s), B.rng(3)).map((p) => p.key), ['ASh', 's']);
-});
-
-test('benchmark: deal 1 can be won, and a game of naive play ends', () => {
-  const dealt = dealOf(DEAL1);
-  assert.equal(B.solvable(dealt, 100000), true);
-  assert.equal(typeof B.playGame(dealt, B.naive, B.rng(1), 500).won, 'boolean');
 });
