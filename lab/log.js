@@ -5,7 +5,7 @@
 'use strict';
 const fs = require('node:fs');
 const G = require('../game.js');
-const F = require('./features.js');
+const P = require('./plays.js');
 
 /** Every event in a log file (one JSON object per line). */
 function readEvents(file) {
@@ -41,7 +41,7 @@ function dealtState(dealEvent) {
 /** Apply one play by its key ("s" or card + destination). Returns the new state, or null. */
 function applyKey(state, key) {
   if (key === 's') return G.draw(state);
-  const m = G.legalMoves(state).find((mv) => F.moveKey(state, mv) === key);
+  const m = G.legalMoves(state).find((mv) => P.moveKey(state, mv) === key);
   return m ? G.move(state, m.from, m.to) : null;
 }
 

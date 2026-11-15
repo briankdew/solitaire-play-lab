@@ -3,19 +3,20 @@
 ## Purpose
 The player plays Klondike-style solitaire here while explaining each decision, by voice or typing. Claude catalogs the reasons, asks a short question when a reason is unclear, and helps put into words any nuance that's hard to describe. The catalog becomes a play model that decides the way the player does. The first goal is a model **more reliable than pure naive play**: play any card that can be played, choosing at random when more than one can, and turn the stock only when no card can be played.
 
+**Start from a clean slate.** The lab exists to define the player's terms and values from their own play. Bring in no factors, values or terms from earlier conversations or other repositories. Every reason code comes from the player's words and is adopted only with their agreement.
+
 The player has played about 50,000 games by hand and leads the research. Follow their direction, keep comments to a minimum, and ask only to clarify. No personal details (such as an email address) in commits or files.
 
 ## How a session works
 - The player runs `./play` (server.py, port 8000) and plays in Chrome. Every action is logged to `games/<game-id>.jsonl`.
 - In Claude Code, `/play` follows the game live and `/review` goes over a finished game. The command files are in `.claude/commands/`.
 - **Claude never coaches during play.** Don't suggest plays, evaluate a position aloud, or hint at hidden cards. Advice would change the data being collected.
-- **Never read hidden information during play.** The `deck` field of a log's deal event holds the shuffle. Read logs only through `tools/watch.py`, which leaves it out. Replaying a game from its deck (`lab/log.js`, `tools/report.py`, `tools/fit.py`) is for finished games only.
+- **Never read hidden information during play.** The `deck` field of a log's deal event holds the shuffle. Read logs only through `tools/watch.py`, which leaves it out. Replaying a game from its deck (`lab/log.js`) is for finished games only.
 
 ## Question rules
 - **Ask when:**
   - the player had a real choice (2 or more plays) and gave no note,
-  - the play differs from the model's pick (`MODEL DIFFERED` in watch.py),
-  - a note uses a term that isn't in `catalog/reasons.json` or `catalog/terminology-draft.md`,
+  - a note uses a term that isn't in `catalog/reasons.json`,
   - two notes contradict each other.
 - **Don't ask when:** only one play was possible, or the note already explains the play.
 - **One question at a time, under 15 words,** about one action (`--n`). Plain words, the player's notation (`A♠h`, `4♥a`, `s`).
@@ -33,16 +34,15 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | Path | What it is |
 |---|---|
 | `game.js`, `ui/`, `index.html`, `styles.css` | The game, copied from the player's solitaire-study app. Rules are unchanged; `ui/lab.js` and small hooks in `ui/actions.js` add the recording. |
-| `lab/features.js` | Factors of each play, from visible cards only (FACTORS lists them). |
-| `lab/model.js`, `model/valuation.json` | The summation model: total = Σ value × factor. The player sets the values. |
+| `lab/plays.js` | The plays available in a position and the visible position. Nothing judges or scores a play. |
 | `lab/log.js` | Reading logs and replaying a game (Node). |
 | `server.py`, `play` | The local server and its start script. |
-| `games/*.jsonl` | One file per deal. Events: `deal` (settings, hidden `deck`, `view`, `plays`, `scores`, `pick`), `move` / `turn` (`n`, `key`, `token`, `think_ms`, `view` before the play, `plays` with factors, `scores`, `pick`, `matched`, `choices`, `note`, `revealed`, `turned`, `auto`), `undo` (`undoes`), `note`, `answer`, `end` (`result` W / L / quit / abandoned). |
+| `games/*.jsonl` | One file per deal. Events: `deal` (settings, hidden `deck`, `view`, `plays`), `move` / `turn` (`n`, `key`, `token`, `think_ms`, `view` before the play, `plays`, `choices`, `note`, `revealed`, `turned`, `auto`), `undo` (`undoes`), `note`, `answer`, `end` (`result` W / L / quit / abandoned). |
 | `live/question.json`, `live/answers.jsonl` | The question channel (not committed). |
-| `catalog/reasons.json` | The reason vocabulary. `catalog/terminology-draft.md` is the player's draft terms, kept exactly as written. |
+| `catalog/reasons.json` | The reason vocabulary, empty at the start and built from the player's words. |
 | `catalog/annotations.jsonl` | Claude's reading of each explained play. |
 | `catalog/reviews/` | One summary per reviewed game. |
-| `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py`, `fit.py` (analysis), `benchmark.js` (win rates). |
+| `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py` (what the games hold), `benchmark.js` (win rates of pure naive play and of perfect information). |
 
 ## Tests
 - `npm test`: rule and lab tests (Node 18+).

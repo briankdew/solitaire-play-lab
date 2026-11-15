@@ -18,7 +18,7 @@ The n-Card Solitaire game (copied from solitaire-study), with think-aloud record
    ```
 
    ```bash
-   gh repo clone briankdew/solitaire-play-lab && cd solitaire-play-lab
+   mkdir -p ~/linux_projects && cd ~/linux_projects && gh repo clone briankdew/solitaire-play-lab && cd solitaire-play-lab
    ```
 
 4. **Install Claude Code**, then run `claude` once to sign in:
@@ -42,7 +42,7 @@ Python 3 is already part of Chromebook Linux. The game and server need nothing e
 2. **Start Claude** in a second Terminal tab (Ctrl+Shift+T):
 
    ```bash
-   cd ~/solitaire-play-lab && claude
+   cd ~/linux_projects/solitaire-play-lab && claude
    ```
 
    Then type `/play`. Claude follows the game from here.
@@ -58,26 +58,23 @@ Python 3 is already part of Chromebook Linux. The game and server need nothing e
 `games/<setup>-<date>-<time>-<tag>.jsonl` holds one line per event:
 - **Each move or turn of the stock:**
   - the position you saw (only cards you could see),
-  - every play you had, with its factors and its score under your values,
-  - the model's pick and whether you matched it,
+  - every play you had,
   - your play (`A♠h`, and the record token `ASh--a`),
   - how long you took, and your note.
 - **Other events:** the deal, undos, notes on their own, answers to questions, and the result.
 
 The deal line also stores the shuffle, so a finished game can be replayed exactly. Claude doesn't look at it while you play.
 
-## The model and the tools
+## The tools
+
+The lab starts from a clean slate: no values, factors or reason codes are built in. The reasons vocabulary (`catalog/reasons.json`) starts empty and grows from your own words, and a code is adopted only when you agree. Claude's coding of each explained play goes in `catalog/annotations.jsonl`.
 
 | Command | What it does |
 |---|---|
-| `python3 tools/report.py` | How often your values pick the play you chose, by situation, plus the plays nothing explains |
+| `python3 tools/report.py` | What the finished games hold: decisions, how many are explained, and the reasons used |
 | `python3 tools/report.py --game ID --plays` | One game, play by play |
-| `python3 tools/fit.py` | Learns values from your choices into `model/learned.json`, next to yours for comparison |
-| `node tools/benchmark.js 4223 --games 2000` | Win rates on the same shuffles: pure naive play, your values, the learned values, and the perfect-information best |
+| `node tools/benchmark.js 4223 --games 2000` | Win rates on the same shuffles for pure naive play and for perfect information (the ceiling) |
 | `python3 tools/watch.py --follow` | The live game, one line per event (what `/play` reads) |
-
-- **Your values** are in `model/valuation.json`: total = Σ value × factor. The factors are listed in `lab/features.js`. They start from your worked example, which scores the 4223 opening as A♠h 2.83 and the stock 0.33.
-- **The reasons vocabulary** is `catalog/reasons.json`, and Claude's coding of each explained play is in `catalog/annotations.jsonl`. `catalog/terminology-draft.md` is your draft terms, copied as written.
 
 ## Tests
 

@@ -20,7 +20,7 @@ async function eventsOf(page, count) {
 const stock = (page) => page.locator('.slot.stock');
 
 test.describe('think aloud', () => {
-  test('records the deal and each play with its factors, scores, note and think time', async ({ page }) => {
+  test('records the deal and each play with the plays available, the note and think time', async ({ page }) => {
     await openApp(page);
     await expect(page.locator('#labStatus')).toHaveText('Ready to record');
     await pickShuffle(page, SCREENSHOT_DEAL);
@@ -36,13 +36,14 @@ test.describe('think aloud', () => {
     expect(dealt.setup).toBe('4223');
     expect(dealt.deck.join(' ')).toBe('AS 3H 4H 3S AH 2S 4S 2H');
     expect(dealt.plays.map((p) => p.key).sort()).toEqual(['ASh', 's']);
-    expect(dealt.scores).toEqual({ ASh: 2.834, s: 0.334 });
+    expect(dealt.scores).toBeUndefined();
 
     expect(first).toMatchObject({
       type: 'move', n: 1, move_no: 1, key: 'ASh', text: 'A♠h', token: 'ASh--a',
-      matched: true, choices: 2, note: 'Starts the spade pile and opens column a',
+      choices: 2, note: 'Starts the spade pile and opens column a',
     });
-    expect(first.pick).toEqual(['ASh']);
+    expect(first.plays).toEqual([{ key: 'ASh', text: 'A♠h' }, { key: 's', text: 's' }]);
+    expect(first.pick).toBeUndefined();
     expect(first.think_ms).toBeGreaterThanOrEqual(0);
     expect(first.view).toEqual({ stock: 2, waste: ['3S', 'AH', '2S'], under: 0, cols: [{ down: 0, up: ['AS'] }, { down: 1, up: ['4H'] }], home: [null, null] });
   });

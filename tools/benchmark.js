@@ -5,12 +5,10 @@
  *   node tools/benchmark.js 4223                 # 2000 shuffles of setup 4223
  *   node tools/benchmark.js 6233 --games 5000 --seed 7
  *
- * Players (each sees only what the player could see, through lab/features.js):
- *   naive    pure naive play: any card play that can be made, chosen at random when there are
- *            several; the stock is turned only when no card can be played. Card plays taken back
- *            off home are left out (a naive player plays forward).
- *   values   the play with the top total under model/valuation.json (ties at random).
- *   learned  the same with model/learned.json, if tools/fit.py has made one.
+ * Players:
+ *   naive    pure naive play, as the player defines it: play any card that can be played,
+ *            choosing at random when more than one can; turn the stock only when no card can be
+ *            played. It sees only what the player could see.
  *   best     a perfect-information solver: can the shuffle be won at all, knowing every card?
  *            An upper limit no player can reach without seeing hidden cards. Searches stop
  *            after --nodes positions per shuffle (counted as unknown).
@@ -21,10 +19,7 @@
  */
 'use strict';
 const G = require('../game.js');
-const F = require('../lab/features.js');
-const M = require('../lab/model.js');
-const fs = require('node:fs');
-const path = require('node:path');
+const P = require('../lab/plays.js');
 
 function parseArgs(argv) {
   const a = { setup: '4223', games: 2000, seed: 1, nodes: 200000, maxActions: 2000 };
@@ -69,7 +64,7 @@ function playGame(dealt, choose, random, maxActions) {
   const seen = new Set([keyOf(state)]);
   for (let actions = 0; actions < maxActions; actions++) {
     if (G.isWon(state)) return { won: true, actions };
-    const plays = F.plays(state);
+    const plays = P.plays(state);
     if (!plays.length) return { won: false, actions };
     let moved = false;
     for (const play of choose(state, plays, random)) {
@@ -95,19 +90,11 @@ function shuffled(list, random) {
   return a;
 }
 
-/** Pure naive play: card plays (not off home) at random first, the stock only after them. */
+/** Pure naive play: every card play in random order first, the stock only after them. */
 function naive(state, plays, random) {
-  const cards = plays.filter((p) => p.kind === 'move' && !p.factors.from_home);
+  const cards = plays.filter((p) => p.kind === 'move');
   const draw = plays.filter((p) => p.kind === 'draw');
   return [...shuffled(cards, random), ...draw];
-}
-
-/** Highest total first, ties in random order. */
-function byValues(valuation) {
-  return (state, plays, random) => {
-    const { scores } = M.score(plays, valuation);
-    return shuffled(plays, random).sort((x, y) => scores[y.key] - scores[x.key]);
-  };
 }
 
 /** Can this shuffle be won by someone who sees every card? true, false, or null (search too big). */
@@ -140,18 +127,10 @@ function interval(wins, n) {
   return [Math.max(0, c - h), Math.min(1, c + h)];
 }
 
-function readJson(file) {
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
-}
-
 function main() {
   const a = parseArgs(process.argv);
   const settings = settingsOf(a.setup);
   const players = { naive };
-  const values = readJson(path.join(__dirname, '..', 'model', 'valuation.json'));
-  if (values) players.values = byValues(values);
-  const learned = readJson(path.join(__dirname, '..', 'model', 'learned.json'));
-  if (learned) players.learned = byValues(learned);
 
   const results = Object.fromEntries(Object.keys(players).map((k) => [k, { wins: 0, actions: 0 }]));
   const best = { wins: 0, unknown: 0 };
@@ -178,4 +157,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { settingsOf, rng, playGame, naive, byValues, solvable };
+module.exports = { settingsOf, rng, playGame, naive, solvable };

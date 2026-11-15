@@ -103,6 +103,7 @@ body {
   text-wrap: balance;
 }
 .brand h1 .var { font-weight: 500; padding-right: 0.04em; }
+.brand h1 .lab-name { font-style: italic; color: #bf9000; }   /* this repository's version of the game */
 .brand p {
   margin: 4px 0 0;
   font-size: 0.75rem;

@@ -3,8 +3,7 @@
 // panel says it isn't recording.
 import { G, S, setupCode } from './shared.js';
 
-const F = window.LabFeatures;
-const M = window.LabModel;
+const P = window.LabPlays;
 
 const el = (id) => document.getElementById(id);
 const panel = el('lab');
@@ -22,7 +21,6 @@ const answerSend = el('labAnswerSend');
 const QUESTION_POLL_MS = 2500;
 
 let recording = false;
-let valuation = { name: 'none', values: {} };
 let game = null;      // { id, ended }
 let n = 0;            // actions so far in this game (moves and turns of the stock)
 let moveNo = 0;       // numbered moves so far (as in the game record)
@@ -54,16 +52,9 @@ function sinceLast() {
   return ms;
 }
 
-/** The plays in a position, their scores and the model's pick. */
-function decision(state) {
-  const plays = F.plays(state);
-  const { scores, pick } = M.score(plays, valuation);
-  return {
-    plays: plays.map((p) => ({ key: p.key, text: p.text, factors: p.factors })),
-    scores,
-    pick,
-    model: valuation.name,
-  };
+/** The plays available in a position, as keys and text (no judgment of them). */
+function playsOf(state) {
+  return P.plays(state).map((p) => ({ key: p.key, text: p.text }));
 }
 
 const pad = (x) => String(x).padStart(2, '0');
@@ -93,8 +84,8 @@ export function onDeal(state, deck) {
     // Not to be read while the game is being played (see CLAUDE.md).
     deck: deck ? deck.map((c) => c.id) : null,
     deal: (S.record || []).map((t) => G.tokenText(t)).join(' '),
-    view: F.describe(state),
-    ...decision(state),
+    view: P.describe(state),
+    plays: playsOf(state),
     note: takeNote(),
   });
   showStatus();
@@ -108,7 +99,7 @@ export function onAction(prev, next, token, { auto = false, retake = false } = {
   if (!game || !token) return;
   const kind = token.type === 'move' ? 'move' : 'turn';
   const key = kind === 'move' ? token.card + token.to : 's';
-  const d = decision(prev);
+  const plays = playsOf(prev);
   n += 1;
   if (kind === 'move') moveNo += 1;
   done.push({ n, kind });
@@ -117,13 +108,12 @@ export function onAction(prev, next, token, { auto = false, retake = false } = {
     n,
     move_no: kind === 'move' ? moveNo : undefined,
     key,
-    text: F.keyText(key),
+    text: P.keyText(key),
     token: G.tokenText(token),
     think_ms: sinceLast(),
-    view: F.describe(prev),
-    ...d,
-    matched: d.pick.includes(key),
-    choices: d.plays.length,
+    view: P.describe(prev),
+    plays,
+    choices: plays.length,
     note: auto ? undefined : takeNote(),
   };
   if (auto) event.auto = true;
@@ -283,8 +273,6 @@ async function start() {
   try {
     const r = await fetch('/api/status', { cache: 'no-store' });
     if (!r.ok) throw new Error(r.status);
-    const v = await fetch('model/valuation.json', { cache: 'no-store' });
-    if (v.ok) valuation = await v.json();
     setStatus(true);
     setInterval(pollQuestion, QUESTION_POLL_MS);
     pollQuestion();

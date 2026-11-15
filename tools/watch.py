@@ -32,8 +32,7 @@ def describe(e):
         num = f" move {e['move_no']}" if e.get("move_no") else ""
         parts = [f"{tag} #{e.get('n')}{num}{who}: {e.get('text')} ({e.get('token')}) after {secs(e.get('think_ms'))}",
                  f"saw {L.view_text(e.get('view'))}",
-                 f"plays: {L.plays_text(e)} ({e.get('choices', 0)} choices)",
-                 "model agreed" if e.get("matched") else "MODEL DIFFERED"]
+                 f"plays: {L.plays_text(e)} ({e.get('choices', 0)} choices)"]
         if e.get("retake"):
             parts.append("take-back to a column")
         if e.get("revealed"):

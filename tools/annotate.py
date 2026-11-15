@@ -79,7 +79,6 @@ def main():
     L.append_line(L.ANNOTATIONS, {
         "t": L.now(), "game": game, "n": a.n, "key": action.get("key"), "play": action.get("text"),
         "codes": wanted, "source": a.source, "quote": a.quote, "summary": a.summary, "confidence": a.confidence,
-        "model_pick": action.get("pick"), "matched": action.get("matched"),
     })
     print(f"Annotated #{a.n} {action.get('text')}: {', '.join(wanted)}")
 

@@ -131,35 +131,8 @@ def view_text(v):
 
 
 def plays_text(e):
-    """'A♠h 2.83* | s 0.33' with * on the model's pick(s)."""
-    scores = e.get("scores") or {}
-    pick = set(e.get("pick") or [])
-    parts = []
-    for p in e.get("plays") or []:
-        mark = "*" if p["key"] in pick else ""
-        parts.append(f"{p['text']} {scores.get(p['key'], 0):g}{mark}")
-    return " | ".join(parts) or "(none)"
-
-
-# ---------- scoring (the same rule as lab/model.js) ----------
-
-def score(plays, valuation):
-    """{key: total} for logged plays (each with 'factors'), using a valuation's values."""
-    values = (valuation or {}).get("values", {})
-
-    def raw(factors):
-        return sum(values.get(k, 0) * v for k, v in (factors or {}).items())
-
-    draw = next((p for p in plays if p["key"] == "s"), None)
-    baseline = raw(draw["factors"]) if draw and (valuation or {}).get("draw_baseline") else 0
-    return {p["key"]: round(raw(p["factors"]) + (0 if p["key"] == "s" else baseline), 3) for p in plays}
-
-
-def picks(scores):
-    if not scores:
-        return []
-    best = max(scores.values())
-    return [k for k, v in scores.items() if abs(v - best) < 1e-9]
+    """The plays that were available: 'A♠h | 4♥a | s'."""
+    return " | ".join(p["text"] for p in e.get("plays") or []) or "(none)"
 
 
 def decisions(events, include_undone=False):
@@ -168,7 +141,3 @@ def decisions(events, include_undone=False):
     standing, all_actions = standing_actions(events)
     chosen = all_actions if include_undone else standing
     return [a for a in chosen if not a.get("auto") and len(a.get("plays") or []) >= 2]
-
-
-def load_valuation(name="valuation"):
-    return read_json(os.path.join(ROOT, "model", name + ".json"))
