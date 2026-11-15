@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>n-Card Solitaire</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="n-Card Solitaire: a Klondike for learning solitaire, drawing one to four cards at a time, with any deck from 4 to 52 cards. Empty columns take the highest card.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,500;0,700;1,500&family=Karla:ital,wght@0,400;0,600;0,700;1,600&family=Archivo:wght@400&display=swap">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="brand">
+      <h1><i class="var">n</i>-Card Solitaire</h1>
+      <p id="ruleLine">Setup 3223 &middot; 6 Cards &middot; Draw 3 &middot; Empty column takes a 3</p>
+    </div>
+  </header>
+
+  <!-- Three columns: room on the left for the record carousel, the fixed play area,
+       and the settings, buttons and How to play stacked on the right. -->
+  <div class="layout">
+    <p class="status" id="status" aria-live="polite">Loading… If the table stays empty, open this page through a web server (npm start), not as a file.</p>
+    <aside class="side side-left">
+      <!-- The game record, one step per action. Display only: Copy record copies the official notation. -->
+      <section class="record" id="record" aria-label="Game record">
+        <h2 class="record-title">Game Record</h2>
+        <div class="record-frame" id="recordFrame">
+          <div class="steps" id="steps" tabindex="0" aria-label="Game record, newest at the bottom"></div>
+        </div>
+        <button class="btn small" id="copyRecordBtn" type="button" disabled>Copy record</button>
+      </section>
+    </aside>
+    <div class="play">
+      <div class="table-wrap">
+        <section class="board" id="board" aria-label="Card table"></section>
+        <!-- On the status line, right-aligned with the last foundation, in the same place whatever the number of columns (placeUndo). -->
+        <button class="btn undo-btn" id="undoBtn" type="button" disabled>Undo move</button>
+        <!-- The game play diagram (custom shuffles only): a panel over the lower play area, and its toggle at the bottom of the play area. -->
+        <div class="diagram" id="diagram" role="img" aria-label="Game play diagram" hidden></div>
+        <button class="btn diagram-btn" id="diagramBtn" type="button" aria-pressed="false" disabled>Game play diagram</button>
+        <div class="win" id="winPanel" hidden>
+          <div class="win-card" role="dialog" aria-labelledby="winTitle">
+            <h2 id="winTitle">You won</h2>
+            <p id="winText">In 0 moves.</p>
+            <div class="win-actions">
+              <button class="btn solid" id="newDealBtn" type="button">New deal</button>
+              <button class="btn" id="sameDealBtn" type="button">Same deal</button>
+              <button class="btn" id="quitBtn" type="button">Quit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <aside class="side side-right">
+      <!-- Think aloud (ui/lab.js): notes for each play, sent with it to the play-lab server, and Claude's questions. -->
+      <section class="lab off" id="lab" aria-label="Think aloud">
+        <h2 class="lab-title">Think aloud <span class="lab-status" id="labStatus">Not recording</span></h2>
+        <div class="lab-question" id="labQuestion" hidden>
+          <p class="lab-q-head">Claude asks <span id="labQMove"></span></p>
+          <p class="lab-q-text" id="labQText"></p>
+          <textarea id="labAnswer" rows="2" aria-label="Your answer" placeholder="Your answer"></textarea>
+          <div class="lab-row">
+            <button class="btn small" id="labAnswerMic" type="button">Speak</button>
+            <button class="btn small" id="labAnswerSend" type="button">Send answer</button>
+          </div>
+        </div>
+        <label class="lab-label" for="labNote">Why this play? <span>Goes with your next play</span></label>
+        <textarea id="labNote" rows="3" placeholder="Optional: say or type your reason"></textarea>
+        <div class="lab-row">
+          <button class="btn small" id="labNoteMic" type="button">Speak</button>
+          <button class="btn small" id="labNoteSend" type="button">Add note now</button>
+        </div>
+      </section>
+      <div class="controls">
+      <form class="settings" id="settingsForm" aria-label="Game settings">
+        <label class="field"><span>High card</span><select id="highestSel"></select></label>
+        <div class="field"><span id="suitsLabel">Suits</span>
+          <div class="picker">
+            <button type="button" class="picker-btn" id="suitsBtn" aria-haspopup="listbox" aria-expanded="false"><span class="picker-value"></span><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <ul class="picker-list" id="suitsList" role="listbox" aria-labelledby="suitsLabel" tabindex="-1" hidden></ul>
+          </div>
+        </div>
+        <label class="field"><span>Columns</span><select id="columnsSel"></select></label>
+        <label class="field"><span>Draw</span><select id="drawSel"></select></label>
+        <div class="field field-wide"><span id="shuffleLabel">Custom shuffle</span>
+          <div class="picker">
+            <button type="button" class="picker-btn" id="shuffleBtn" aria-haspopup="listbox" aria-expanded="false"><span class="picker-value"></span><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <ul class="picker-list" id="shuffleList" role="listbox" aria-labelledby="shuffleLabel" tabindex="-1" hidden></ul>
+          </div>
+        </div>
+        <label class="field field-wide"><span>Card font</span><select id="cardFontSel"></select></label>
+        <label class="toggle"><input type="checkbox" id="autoFinishChk" checked><span>Auto-complete</span></label>
+        <p class="hint" id="settingsHint"></p>
+      </form>
+      <div class="toolbar" aria-label="Game actions">
+        <button class="btn" id="restartBtn" type="button" disabled>Restart deal</button>
+        <button class="btn" id="newBtn" type="button">New shuffle</button>
+        <button class="btn" id="quitGameBtn" type="button">Quit</button>
+        <button class="btn" id="endGameBtn" type="button" disabled>End game</button>
+      </div>
+      </div>
+      <details class="howto" id="howto">
+        <summary>How to play</summary>
+        <ul>
+          <li><b>Goal:</b> build each suit from Ace up to the highest card on the foundations at the top right.</li>
+          <li><b>Foundations:</b> one per suit, in the standard suit order ♠ ♥ ♣ ♦ from left to right (two suits are ♠ and ♥), each marked with an A and its suit while empty. Each takes only its own suit's Ace and then builds up in that suit; an Ace dragged onto any foundation goes to its own.</li>
+          <li><b>Shuffle, then deal:</b> shuffling only mixes the cards, which wait face down in the stock with a <b>Deal</b> button on the last waste position. Dealing puts them on the table to start play.</li>
+          <li><b>Deal:</b> the standard Klondike deal, in rows from the top of the deck: one card to each column from left to right with only the first face up, then a row starting at the second column, and so on, so the columns get 1, 2, 3… cards with only the last one face up. The rest of the deck becomes the stock in the same order, and its first cards (as many as one turn takes) are turned over so a card is playable right away.</li>
+          <li><b>Stock:</b> click it to turn over more cards (as many as the <b>Draw</b> setting). The stock and waste work as one pile: once the stock runs out, it shows the refresh arrow while any waste cards are hidden under the fan, and clicking it turns the waste back over onto the stock and turns up the next cards in one go. When every remaining card is already showing, the stock is empty and clicking it just shakes the waste. Once one turn or less is left in the real stock, its top card shows how many cards remain. The waste has one dashed position per card drawn and always shows that many of its top cards; only the top (rightmost) one can be played, and playing it slides the others right and brings up the next card. There is no limit on passes.</li>
+          <li><b>Columns:</b> build down in alternating colors, red on black or black on red. An empty column takes only the highest card, or a run that starts with it.</li>
+          <li><b>Click</b> the top waste card or any face-up column card to play it automatically: to its foundation if it can go there, otherwise to the leftmost column that takes it. Cards on top of a clicked column card move with it, and a group like that only goes to a column. If a click sends a card to its foundation when you meant a column, click it again on the foundation straight away: it goes to the column instead, as if it had gone there in the first place (the record is corrected, no move is added, and Undo puts it back where it started).</li>
+          <li><b>Click a foundation's top card</b> to bring it back down to the leftmost column that takes it (a new move, unless it is the take-back just described).</li>
+          <li><b>Drag</b> any face-up card, with the cards on top of it, to a column or foundation. Cards on a foundation can be dragged back down to a column.</li>
+          <li>Once every card is face up, the game finishes itself, unless <b>Auto-complete</b> is turned off; then you play every card yourself. When you win, choose <b>New deal</b> to shuffle and deal a new game, <b>Same deal</b> to deal this shuffle again, or <b>Quit</b>.</li>
+          <li><b>Settings:</b> the high card (the highest rank in each suit, 2 to K, with X for ten), suits (2 or 4), the number of columns (2 to 7) and cards drawn from the stock at a time (1 to 4), in the same order as a game record's header. Changing a setting shuffles a new deck for the new settings, with the same warning as <b>New shuffle</b> if a game is in play. There are always at least as many columns as suits, so every highest card can head a column; 4 suits also need a highest card of 3 or more. Column counts that would leave no cards for the stock are unavailable.</li>
+          <li><b>Card font:</b> the font of the card faces on the table: <b>Libertinus Mono</b> (the default), with ranks a little heavier than the font's regular weight and each corner's rank and suit the same size, or <b>Original</b>, the first design (Libre Bodoni ranks, smaller corner suits). It changes only how the cards look, so it never reshuffles, and the browser remembers it.</li>
+          <li><b>Custom shuffle:</b> pick a numbered deal to shuffle the deck into exactly that order (shown left to right from the top of the deck), or Random. A deal also changes the other settings to the ones it is listed for, with Draw 3. The deals are grouped by setup, each group numbered from 1. <b>2223</b> has the 12 deals of the 4-card deck (high card 2, 2 suits, 2 columns), one for each game that is different once trading the two suits is set aside; <b>4223</b> has 8-card deals added as they come up in study. A deal too long to show on the closed menu shows its number and setup instead (1 · 4223). A random shuffle that matches a listed deal shows its number.</li>
+          <li><b>Moves</b> (numbered in the game record) count cards played to a column or foundation, including those the automatic finish plays. Turning the stock doesn't count.</li>
+          <li><b>Undo move</b> takes back one action; it reads <b>Undo draw</b> when the last action was a turn of the stock. <b>Restart deal</b> deals the current shuffle again and starts play from the beginning. <b>New shuffle</b> mixes the cards without dealing; if a game is in play, it asks first. <b>Quit</b> stops play and leaves the table exactly as it is, until you choose Restart deal or New shuffle. <b>End game</b> does the same and records the game as a loss.</li>
+          <li><b>Pile names:</b> the letters above the table name each pile for writing down play: <b>s</b> stock, <b>w</b> waste, <b>h</b> foundations, and <b>a</b>, <b>b</b>, <b>c</b>… the columns from left to right.</li>
+          <li><b>Game Record:</b> the panel on the left shows the game as it is played, one step per action, newest at the bottom; scroll it to look back. Steps scrolled past either end stay pinned there, and the next step slides over them. Each line is cards and then a pile letter. <b>D</b> is the deal, in the order a physical deal shows it: each column's face-up card, then the waste cards showing. A numbered step is a move: the card moved (the bottom card of a run) and where it went, then what now shows on the pile it came from and that pile's letter (<b>--</b> when it is empty). An unnumbered step is a turn of the stock, showing every waste card in view. Letters of your own moves are blue; the deal and the waste are gray. A move may start with a judgment, as in chess (<b>!</b> good, <b>!!</b> brilliant, <b>?</b> mistake, <b>??</b> blunder, <b>!?</b> interesting, <b>?!</b> dubious). So far only <b>?</b> is used: for an Ace played to a column, or a 2 taken off its foundation, since both move away from filling the foundations. <b>EOP</b> ends a finished game: <b>W</b> (win) or <b>L</b> (loss, from End game) and the number of moves. Undo removes the last step.</li>
+          <li><b>Copy record</b> copies the official record, the notation used to write a game down by hand: suit letters (S H C D), every item a card then its pile letter, a move written as one token (<b>ADhACb</b>, <b>2Dh--w</b>), a stock turn naming the cards turned up (<b>8S4H9Dw</b>), a judged move starting with its judgment (<b>?AHa--h</b>), and the result last (<b>W7</b>), under a <b>Setup</b> line of highest card, suits, columns and draw (e.g. 3223).</li>
+          <li><b>Game play diagram</b> (for the custom shuffles): the button under the table shows or hides a diagram of the game as you play it. Each row is a pile (<b>w</b>, the columns, then each foundation) showing its top card (the waste shows its fan, with the covered cards shaded), and each snapshot, left to right, is the table after the deal, a numbered move or a <b>Draw</b>. Lines between snapshots show what happened: a solid gold arrow is the play made, a dashed gold arrow a draw, a dashed gold line each other legal play that could have been made, a dashed white arrow a face-down card turned over (reveal), a dotted white arrow a card already known coming to the top (promote), and a plain white line a pile that didn't change. A judged move shows its judgment beside the card where it landed (<b>A♥ ?</b>). Older snapshots slide off to the left as new ones arrive; Undo slides them back.</li>
+          <li><b>Think aloud:</b> with the play-lab server running (<b>./play</b>), every action is recorded with what you could see, the plays you had and your note. Say or type why you chose a play in the box (Speak uses Chrome's speech recognition); the note goes with your next play, or <b>Add note now</b> sends it on its own. Questions from Claude appear above the note box, with the play they're about; answer them there or in the terminal, whenever suits you. Ctrl+Enter sends a note or an answer. Without the server the game plays as usual and the panel says <b>Not recording</b>.</li>
+          <li><b>Keyboard:</b> Tab to a card and press Enter to play it. Ctrl+Z undoes a move.</li>
+        </ul>
+      </details>
+    </aside>
+  </div>
+
+  <!-- Confirmation before a reshuffle ends a game in play. Neither choice is preselected. -->
+  <div class="modal" id="confirmModal" hidden>
+    <div class="win-card modal-card" id="confirmCard" role="alertdialog" aria-modal="true" aria-labelledby="confirmText" tabindex="-1">
+      <p id="confirmText">Reshuffling will end the current game!</p>
+      <div class="win-actions">
+        <button class="btn" id="confirmContinue" type="button">Continue</button>
+        <button class="btn" id="confirmCancel" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="game.js"></script>
+<script src="lab/features.js"></script>
+<script src="lab/model.js"></script>
+<script type="module" src="ui/main.js"></script>
+</body>
+</html>

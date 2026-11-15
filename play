@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Start the play lab: ./play  (then open http://localhost:8000 in Chrome)
+# Options are passed to server.py, e.g. ./play --port 8001
+cd "$(dirname "$0")" || exit 1
+# On a Chromebook, Chrome reaches Linux servers through ChromeOS port forwarding, which needs the
+# server to listen beyond the container's loopback. Elsewhere, stay on this computer only.
+if [ -z "$HOST" ] && { [ -e /dev/.cros_milestone ] || [ "$(hostname)" = "penguin" ]; }; then
+  export HOST=0.0.0.0
+fi
+exec python3 server.py "$@"

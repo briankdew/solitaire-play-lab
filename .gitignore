@@ -1,0 +1,13 @@
+node_modules/
+.DS_Store
+.vscode/
+.claude/settings.local.json
+.codex
+*.log
+test-results/
+playwright-report/
+
+# play lab: games/ is committed (it is the research data); live/ is the question channel during play
+.lab-test-data/
+live/
+__pycache__/

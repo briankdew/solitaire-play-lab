@@ -1,0 +1,32 @@
+{
+  "name": "naive valuation v1",
+  "about": "Your summation values. A play's total is the sum of value x factor. Factors are defined in lab/features.js (FACTORS). Values of 0 are factors that are measured but not valued yet; negative values are allowed.",
+  "draw_baseline": true,
+  "values": {
+    "home": 1.0,
+    "starts_home": 0,
+    "opens_column": 0.5,
+    "fills_column": 0,
+    "reveals": 0.5,
+    "sets_up_reveal": 0.5,
+    "new_home_plays": 0,
+    "new_column_plays": 0.5,
+    "lost_plays": 0,
+    "promotes": 0,
+    "from_home": 0,
+    "judged_mistake": 0,
+    "draw": 0,
+    "draw_fraction": 0.5,
+    "recycles": 0,
+    "buries_playable": 0
+  },
+  "notes": {
+    "home": "Starts h pile = 1.00 in the worked example: full contribution to progressive play. Applied to every play home.",
+    "opens_column": "0.50: partial potential contribution.",
+    "new_column_plays": "0.50 per play set up (Sets up 4Ha in the worked example).",
+    "sets_up_reveal": "0.50: Reveals hidden card on b, an immediate consequence of the play.",
+    "reveals": "0.50 assumed, the same as setting up a reveal; not in the worked example.",
+    "draw_fraction": "A full draw is worth 0.50, so 2 of 3 cards = 0.33.",
+    "new_home_plays": "0 so the worked example totals 2.83 (2Sh was not counted). Change if a set-up home play should count."
+  }
+}
