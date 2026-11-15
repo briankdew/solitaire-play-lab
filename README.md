@@ -53,7 +53,11 @@ Python 3 is already part of Chromebook Linux. The game and server need nothing e
 
 4. **Replay a shuffle:** **Played shuffles** lists every shuffle you've dealt, for one setup at a time, newest first. Each has an ID like `K473-000001-7f3a9c21d4e8`: the setup, a 6-digit counter of that setup's shuffles, and a fingerprint of the card order that shows no cards. Find one by its counter or part of its ID and choose **Replay**. A replayed shuffle keeps its ID, and the list shows how often you've played it, how those games ended, and whether it's a mirror of another shuffle (the same game with suits traded). The current shuffle's ID shows under Think aloud.
 
-5. **After a game:** `/review` goes over it with you, fills the gaps and saves a summary. Claude commits and pushes the games and the catalog, so GitHub keeps everything.
+5. **Exploratory games:** tick **Exploratory game** in Think aloud for a game where you're trying something out. You can tick it before dealing or at any time until the game ends. These games stay out of the model and are listed in their own section of Played shuffles. During them Claude doesn't ask the usual questions, but discusses your strategy whenever you ask. The setting stays on for later deals until you untick it.
+
+6. **Deleting a shuffle:** in Played shuffles, **Delete** removes a shuffle and all its games from the list and from analysis. They move to `games/deleted/` (not sent to GitHub), and the **Deleted** section can restore them. Counter numbers are never reused.
+
+7. **After a game:** `/review` goes over it with you, fills the gaps and saves a summary. Claude commits and pushes the games and the catalog, so GitHub keeps everything.
 
 ## What gets recorded
 

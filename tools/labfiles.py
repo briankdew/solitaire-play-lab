@@ -135,6 +135,15 @@ def plays_text(e):
     return " | ".join(p["text"] for p in e.get("plays") or []) or "(none)"
 
 
+def is_exploratory(events):
+    """True if the game is exploratory: the last switch before it ended (deal, mark or end event)."""
+    flag = False
+    for e in events:
+        if e.get("type") in ("deal", "mark", "end") and "exploratory" in e:
+            flag = bool(e["exploratory"])
+    return flag
+
+
 def decisions(events, include_undone=False):
     """The player's decisions in a game: standing (or all) actions that were not automatic and had
     a real choice (2 or more plays)."""

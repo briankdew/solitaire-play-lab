@@ -5,6 +5,12 @@ The player plays Klondike-style solitaire here while explaining each decision, b
 
 **Start from a clean slate.** The lab exists to define the player's terms and values from their own play. Bring in no factors, values, terms, baselines (such as naive play or perfect play) or results from earlier conversations or other repositories. Every reason code comes from the player's words and is adopted only with their agreement. The data set is only the games played here.
 
+**Method and exploratory games.** A game is a method game unless the player switches on **Exploratory game** in Think aloud (before dealing, or any time until the game ends; the setting when it ends is what counts). Exploratory games are for trying out a new strategy and talking it over. They are kept out of every analysis of how the player plays, the reason vocabulary's evidence and `/review` gap-filling, unless the player asks. During an exploratory game:
+- don't ask the routine questions;
+- discuss positions and strategy freely **when the player asks**;
+- still never use hidden cards.
+watch.py marks them `EXPLORATORY` (and `MARK` when the switch changes mid-game).
+
 **Judgment marks.** The game marks some moves with chess-style judgments (`?` in the Game Record and at the start of a logged `token`). The player plans to develop this system; until they formalize it, don't use the marks in any analysis, question or summary.
 
 The player has played about 50,000 games by hand and leads the research. Follow their direction, keep comments to a minimum, and ask only to clarify. No personal details (such as an email address) in commits or files.
@@ -40,8 +46,9 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | `lab/plays.js` | The plays available in a position and the visible position. Nothing judges or scores a play. |
 | `lab/log.js` | Reading logs and replaying a game (Node). |
 | `server.py`, `play` | The local server and its start script. |
-| `shuffles.py`, `games/index.jsonl` | Shuffle IDs (`<setup>-<6-digit counter>-<12-hex fingerprint>`, e.g. `K473-000001-7f3a9c21d4e8`), mirror groups, and the index of played shuffles (holds deck orders). `python3 shuffles.py --rebuild` rebuilds the index from the game logs. |
-| `games/*.jsonl` | One file per deal. Events: `deal` (settings, hidden `deck`, `shuffle`, `mirror`, `first_deal`, `view`, `plays`), `move` / `turn` (`n`, `key`, `token`, `think_ms`, `view` before the play, `plays`, `choices`, `note`, `revealed`, `turned`, `auto`), `undo` (`undoes`), `note`, `answer`, `end` (`result` W / L / quit / abandoned). |
+| `shuffles.py`, `games/index.jsonl` | Shuffle IDs (`<setup>-<6-digit counter>-<12-hex fingerprint>`, e.g. `K473-000001-7f3a9c21d4e8`), mirror groups, each game's kind (method or exploratory), and the index of played shuffles (holds deck orders). `python3 shuffles.py --rebuild` rebuilds the index from the game logs. |
+| `games/deleted/<shuffle id>/` | Shuffles deleted from Played shuffles: their game logs, coded reasons and reviews, kept so a delete can be undone (Restore in Played shuffles → Deleted, or `python3 shuffles.py --restore ID` with ./play stopped). Not committed. Counter numbers are never reused. |
+| `games/*.jsonl` | One file per deal. Events: `deal` (settings, hidden `deck`, `shuffle`, `mirror`, `first_deal`, `exploratory`, `view`, `plays`), `mark` (`exploratory`, `after`), `move` / `turn` (`n`, `key`, `token`, `think_ms`, `view` before the play, `plays`, `choices`, `note`, `revealed`, `turned`, `auto`), `undo` (`undoes`), `note`, `answer`, `end` (`result` W / L / quit / abandoned, `exploratory`). |
 | `live/question.json`, `live/answers.jsonl` | The question channel (not committed). |
 | `catalog/reasons.json` | The reason vocabulary, empty at the start and built from the player's words. |
 | `catalog/annotations.jsonl` | Claude's reading of each explained play. |

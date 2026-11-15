@@ -19,6 +19,8 @@ const answerEl = el('labAnswer');
 const answerMic = el('labAnswerMic');
 const answerSend = el('labAnswerSend');
 const shuffleEl = el('labShuffle');
+const exploreChk = el('labExplore');
+const EXPLORE_KEY = 'solitaire-play-lab.exploratory';
 
 const QUESTION_POLL_MS = 2500;
 
@@ -43,7 +45,9 @@ function send(event, onReply) {
 }
 
 /** The shuffle being played, under the Think aloud title. */
+let shuffleId = null;   // the shuffle being played, from the server
 function showShuffle(reply) {
+  shuffleId = reply && reply.shuffle ? reply.shuffle : null;
   if (!reply || !reply.shuffle) { shuffleEl.hidden = true; return; }
   const times = reply.first_deal ? 'new' : `game ${reply.plays} of this shuffle`;
   const mirror = reply.mirror_of && reply.mirror_of.length ? ` · mirror of ${reply.mirror_of[0]}` : '';
@@ -101,6 +105,7 @@ export function onDeal(state, deck) {
     deal: (S.record || []).map((t) => G.tokenText(t)).join(' '),
     view: P.describe(state),
     plays: playsOf(state),
+    exploratory: exploreChk.checked,
     note: takeNote(),
   }, showShuffle);
   shuffleEl.hidden = true;
@@ -184,8 +189,27 @@ export function onEnd(result) {
     result,
     moves: S.moves,
     record: S.record ? G.recordText(S.state, S.record) : null,
+    exploratory: exploreChk.checked,
     note: takeNote(),
   });
+}
+
+/** The shuffle of the game in play (it can't be deleted while it's being played), or null. */
+export function shuffleInPlay() {
+  return game && !game.ended ? shuffleId : null;
+}
+
+/* ---------- exploratory games ---------- */
+
+/** Exploratory: a game kept out of the model. The switch applies to the game in play (until it
+ * ends) and to the games dealt after it, until it is switched off. */
+function showExploratory() {
+  panel.classList.toggle('exploring', exploreChk.checked);
+}
+function onExploreChange() {
+  try { localStorage.setItem(EXPLORE_KEY, exploreChk.checked ? 'on' : 'off'); } catch { /* ignore */ }
+  showExploratory();
+  if (game && !game.ended) send({ type: 'mark', exploratory: exploreChk.checked, after: done.length ? done[done.length - 1].n : 0 });
 }
 
 /* ---------- notes and answers ---------- */
@@ -278,6 +302,9 @@ function setStatus(on, message) {
 function showStatus() { if (recording) setStatus(true); }
 
 async function start() {
+  try { exploreChk.checked = localStorage.getItem(EXPLORE_KEY) === 'on'; } catch { /* ignore */ }
+  showExploratory();
+  exploreChk.addEventListener('change', onExploreChange);
   speech(noteMic, noteEl);
   speech(answerMic, answerEl);
   noteSend.addEventListener('click', sendNoteNow);

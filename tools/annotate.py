@@ -78,7 +78,7 @@ def main():
         sys.exit(f"No action #{a.n} in {game}.")
     L.append_line(L.ANNOTATIONS, {
         "t": L.now(), "game": game, "n": a.n, "key": action.get("key"), "play": action.get("text"),
-        "codes": wanted, "source": a.source, "quote": a.quote, "summary": a.summary, "confidence": a.confidence,
+        "codes": wanted, "source": a.source, "exploratory": L.is_exploratory(L.read_lines(L.game_path(game))), "quote": a.quote, "summary": a.summary, "confidence": a.confidence,
     })
     print(f"Annotated #{a.n} {action.get('text')}: {', '.join(wanted)}")
 

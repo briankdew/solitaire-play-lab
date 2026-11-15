@@ -10,4 +10,5 @@ playwright-report/
 # play lab: games/ is committed (it is the research data); live/ is the question channel during play
 .lab-test-data/
 live/
+games/deleted/
 __pycache__/

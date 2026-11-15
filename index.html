@@ -30,6 +30,7 @@
       <section class="lab off" id="lab" aria-label="Think aloud">
         <h2 class="lab-title">Think aloud <span class="lab-status" id="labStatus">Not recording</span></h2>
         <p class="lab-shuffle" id="labShuffle" hidden></p>
+        <label class="lab-explore"><input type="checkbox" id="labExplore"><span>Exploratory game <small>kept out of the model; Claude discusses when asked</small></span></label>
         <div class="lab-question" id="labQuestion" hidden>
           <p class="lab-q-head">Claude asks <span id="labQMove"></span></p>
           <p class="lab-q-text" id="labQText"></p>
@@ -141,6 +142,11 @@
   <div class="modal" id="replayModal" hidden>
     <div class="win-card modal-card replay-card" id="replayCard" role="dialog" aria-modal="true" aria-labelledby="replayTitle" tabindex="-1">
       <h2 id="replayTitle">Played shuffles</h2>
+      <div class="replay-tabs" role="tablist" aria-label="Which games">
+        <button type="button" role="tab" class="replay-tab" data-kind="method" aria-selected="true">Method games</button>
+        <button type="button" role="tab" class="replay-tab" data-kind="exploratory" aria-selected="false">Exploratory</button>
+        <button type="button" role="tab" class="replay-tab" data-kind="deleted" aria-selected="false">Deleted</button>
+      </div>
       <div class="replay-filters">
         <label>Setup <select id="replaySetup"></select></label>
         <label>Find <input id="replaySearch" type="search" placeholder="counter or part of ID" autocomplete="off"></label>

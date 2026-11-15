@@ -27,7 +27,8 @@ def describe(e):
         shuffle = ""
         if e.get("shuffle"):
             shuffle = f" | shuffle {e['shuffle']} ({'new' if e.get('first_deal') else 'REPLAY: do not read earlier games of this shuffle while it is in play'})"
-        return (f"DEAL {e.get('setup')} game {e.get('_game')}{shuffle} | {L.view_text(e.get('view'))}"
+        kind = " | EXPLORATORY: discuss when asked, no routine questions" if e.get("exploratory") else ""
+        return (f"DEAL {e.get('setup')} game {e.get('_game')}{shuffle}{kind} | {L.view_text(e.get('view'))}"
                 f" | plays: {L.plays_text(e)}" + (f' | note: "{e["note"]}"' if e.get("note") else ""))
     if t in ("move", "turn"):
         tag = "PLAY" if t == "move" else "TURN"
@@ -44,6 +45,9 @@ def describe(e):
             parts.append("turned up " + " ".join(L.card_text(c) for c in e["turned"]))
         parts.append(f'note: "{e["note"]}"' if e.get("note") else "no note")
         return " | ".join(parts)
+    if t == "mark":
+        return (f"MARK after #{e.get('after')}: now EXPLORATORY (discuss when asked)" if e.get("exploratory")
+                else f"MARK after #{e.get('after')}: now a method game (back to the usual rules)")
     if t == "undo":
         return f"UNDO #{e.get('undoes')}" + (" (take-back)" if e.get("retake") else "") + (f' | note: "{e["note"]}"' if e.get("note") else "")
     if t == "note":

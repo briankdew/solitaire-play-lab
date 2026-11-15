@@ -141,7 +141,7 @@ test.describe('played shuffles', () => {
     const row = page.locator('.replay-row').filter({ hasText: id });
     await expect(row).toHaveCount(1);
     await expect(page.locator('#replayList')).not.toContainText('AS');   // no cards in the list
-    await row.locator('button').click();
+    await row.getByRole('button', { name: 'Replay' }).click();
     await page.locator('#confirmContinue').click();   // a game is in play: confirm ending it
     await settle(page);
     await expect(page.locator('#replayModal')).toBeHidden();
@@ -151,5 +151,66 @@ test.describe('played shuffles', () => {
 
     const events = await eventsOf(page, 1);
     expect(events[0]).toMatchObject({ type: 'deal', shuffle: id, first_deal: false });
+  });
+});
+
+test.describe('exploratory games and deleting', () => {
+  test('the Exploratory switch marks the game, including a switch mid-game, and lists it apart', async ({ page }) => {
+    await openApp(page, { seed: 4242 });
+    await page.evaluate(() => localStorage.removeItem('solitaire-play-lab.exploratory'));
+    await page.locator('#highestSel').selectOption('9');   // an 18-card deck: no other test deals the same shuffle
+    await deal(page);
+    const id = (await page.locator('#labShuffle b').textContent()).trim();
+    await page.locator('#labExplore').check();
+    await expect(page.locator('#lab')).toHaveClass(/exploring/);
+    await page.locator('#endGameBtn').click();
+    const events = await eventsOf(page, 3);
+    expect(events[0].exploratory).toBe(false);
+    expect(events.find((e) => e.type === 'mark')).toMatchObject({ exploratory: true });
+    expect(events[events.length - 1]).toMatchObject({ type: 'end', result: 'L', exploratory: true });
+
+    await page.locator('#replayBtn').click();
+    await page.locator('.replay-tab[data-kind="exploratory"]').click();
+    await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await expect(page.locator('.replay-row').filter({ hasText: id })).toContainText('1 exploratory game');
+    await page.locator('.replay-tab[data-kind="method"]').click();
+    await expect(page.locator('.replay-row').filter({ hasText: id })).toHaveCount(0);
+    await page.locator('#replayClose').click();
+    await page.locator('#labExplore').uncheck();
+  });
+
+  test('Delete asks first, moves the shuffle to Deleted, and Restore brings it back', async ({ page }) => {
+    await openApp(page, { seed: 777 });
+    await page.evaluate(() => localStorage.removeItem('solitaire-play-lab.exploratory'));
+    await page.locator('#highestSel').selectOption('9');   // an 18-card deck: no other test deals the same shuffle
+    await deal(page);
+    const id = (await page.locator('#labShuffle b').textContent()).trim();
+    const file = await gameFile(page);
+    await page.locator('#replayBtn').click();
+    await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    const row = page.locator('.replay-row').filter({ hasText: id });
+    await expect(row.getByRole('button', { name: 'Delete' })).toBeDisabled();   // being played
+    await page.locator('#replayClose').click();
+    await page.locator('#endGameBtn').click();
+    await expect.poll(() => readEvents(file).some((e) => e.type === 'end')).toBe(true);
+
+    await page.locator('#replayBtn').click();
+    await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await row.getByRole('button', { name: 'Delete' }).click();
+    await expect(row).toContainText('Delete it and its 1 game?');
+    await row.getByRole('button', { name: 'Delete' }).click();
+    await expect(page.locator('#replayCount')).toContainText(`Deleted ${id}`);
+    await expect(row).toHaveCount(0);
+    expect(fs.existsSync(file)).toBe(false);
+    expect(fs.existsSync(path.join(DATA, 'games', 'deleted', id, path.basename(file)))).toBe(true);
+
+    await page.locator('.replay-tab[data-kind="deleted"]').click();
+    await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await row.getByRole('button', { name: 'Restore' }).click();
+    await expect(page.locator('#replayCount')).toContainText(`Restored ${id}`);
+    expect(fs.existsSync(file)).toBe(true);
+    await page.locator('.replay-tab[data-kind="method"]').click();
+    await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await expect(row).toContainText('lost 1');
   });
 });

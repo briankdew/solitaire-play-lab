@@ -9,14 +9,15 @@ The player is about to play (or is playing) in the browser with `./play` running
    - **Without Monitor:** run it in the background with Bash (`run_in_background`) and read its output whenever the player says something, or at least every few actions.
    - Each line is one event (DEAL, PLAY, TURN, UNDO, NOTE, ANSWER, END).
    - Never read `games/*.jsonl` directly while a game is in play: the deal line holds the hidden deck.
-3. For each PLAY or TURN:
+3. **Exploratory games** (the DEAL or a MARK line says EXPLORATORY): no routine questions. Discuss strategy and visible positions when the player asks, never hidden cards. Annotate only what the player asks you to keep. A MARK back to a method game restores the usual rules from that point.
+4. For each PLAY or TURN in a method game:
    - **With a note:** catalog it with `python3 tools/annotate.py --n N --codes ... --source note --quote "..." --summary "..."`.
    - **No note, but the question rules say to ask:** run `python3 tools/ask.py --n N --play "A♥h" "Short question?"`. The question appears in the game's panel. Ask only when no other question is open.
    - **No note and no question needed:** add nothing now. `/review` covers it.
-4. **ANSWER** (or the player answers in the terminal): record a terminal answer with `python3 tools/ask.py --answer "..."`. Then annotate that action with `--source answer`.
-5. **A reason no code covers:** suggest a code in one line ("New: `surface_soon`, Surface soon: … OK?"). On a yes, run `tools/annotate.py --propose ...` and then `--adopt`, and use it.
-6. **Keep the terminal quiet:** at most one short line per event you act on. Never comment on the quality of a play, never suggest a play, never mention what a hidden card might be.
-7. **On END:**
+5. **ANSWER** (or the player answers in the terminal): record a terminal answer with `python3 tools/ask.py --answer "..."`. Then annotate that action with `--source answer`.
+6. **A reason no code covers:** suggest a code in one line ("New: `surface_soon`, Surface soon: … OK?"). On a yes, run `tools/annotate.py --propose ...` and then `--adopt`, and use it.
+7. **Keep the terminal quiet:** at most one short line per event you act on. In method games, never comment on the quality of a play or suggest a play. Never mention what a hidden card might be.
+8. **On END:**
    - Give a 2–3 line tally: actions, decisions, notes, and questions asked and answered.
    - Ask whether to `/review` now or keep playing.
    - Keep following for the next deal.

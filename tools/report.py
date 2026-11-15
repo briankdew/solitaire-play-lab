@@ -6,7 +6,7 @@
 
 A decision is a play the player chose (not the automatic finish) when there were 2 or more plays.
 A decision is explained when it has a note, an answer to a question, or a coded reason.
-Nothing here judges a play.
+Exploratory games are counted apart and kept out of the totals. Nothing here judges a play.
 """
 import argparse
 import os
@@ -41,7 +41,9 @@ def annotations(game=None):
 
 
 def overall():
-    games = [g for g in L.all_games() if finished(L.read_lines(L.game_path(g)))]
+    finished_games = [g for g in L.all_games() if finished(L.read_lines(L.game_path(g)))]
+    games = [g for g in finished_games if not L.is_exploratory(L.read_lines(L.game_path(g)))]
+    exploratory = len(finished_games) - len(games)
     ann = annotations()
     total = explained = undone = 0
     results = Counter()
@@ -56,10 +58,12 @@ def overall():
             if d.get("note") or more.get(d["n"]) or ann.get((g, d["n"])):
                 explained += 1
         undone += sum(1 for e in events if e.get("type") == "undo")
-    for items in ann.values():
-        for a in items:
-            codes.update(a.get("codes", []))
-    print(f"{len(games)} finished games: " + ", ".join(f"{k} {v}" for k, v in results.items()))
+    for (g, _), items in ann.items():
+        if g in games:
+            for a in items:
+                codes.update(a.get("codes", []))
+    print(f"{len(games)} finished method games: " + ", ".join(f"{k} {v}" for k, v in results.items())
+          + f"  ({exploratory} exploratory games not counted)")
     print(f"{total} decisions (2+ plays, not automatic), {explained} explained, {undone} undos")
     if codes:
         print("\nReasons used:")
@@ -78,7 +82,8 @@ def one_game(game):
     ann = annotations(game)
     deal = events[0]
     end = next((e for e in events if e.get("type") == "end"), {})
-    print(f"Game {game}, setup {deal.get('setup')}: deal {deal.get('deal')}")
+    kind = "EXPLORATORY game (kept out of the model)" if L.is_exploratory(events) else "method game"
+    print(f"Game {game}, setup {deal.get('setup')}, shuffle {deal.get('shuffle')}, {kind}: deal {deal.get('deal')}")
     print(f"Result: {end.get('result')} in {end.get('moves')} moves\n")
     for a in all_actions:
         flag = " (undone)" if a["undone"] else ""
