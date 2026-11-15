@@ -26,6 +26,26 @@
   <div class="layout">
     <p class="status" id="status" aria-live="polite">Loading… If the table stays empty, open this page through a web server (npm start), not as a file.</p>
     <aside class="side side-left">
+      <!-- Think aloud (ui/lab.js): notes for each play, sent with it to the play-lab server, and Claude's questions. -->
+      <section class="lab off" id="lab" aria-label="Think aloud">
+        <h2 class="lab-title">Think aloud <span class="lab-status" id="labStatus">Not recording</span></h2>
+        <p class="lab-shuffle" id="labShuffle" hidden></p>
+        <div class="lab-question" id="labQuestion" hidden>
+          <p class="lab-q-head">Claude asks <span id="labQMove"></span></p>
+          <p class="lab-q-text" id="labQText"></p>
+          <textarea id="labAnswer" rows="2" aria-label="Your answer" placeholder="Your answer"></textarea>
+          <div class="lab-row">
+            <button class="btn small" id="labAnswerMic" type="button">Speak</button>
+            <button class="btn small" id="labAnswerSend" type="button">Send answer</button>
+          </div>
+        </div>
+        <label class="lab-label" for="labNote">Why this play? <span>Goes with your next play</span></label>
+        <textarea id="labNote" rows="3" placeholder="Optional: say or type your reason"></textarea>
+        <div class="lab-row">
+          <button class="btn small" id="labNoteMic" type="button">Speak</button>
+          <button class="btn small" id="labNoteSend" type="button">Add note now</button>
+        </div>
+      </section>
       <!-- The game record, one step per action. Display only: Copy record copies the official notation. -->
       <section class="record" id="record" aria-label="Game record">
         <h2 class="record-title">Game Record</h2>
@@ -57,26 +77,6 @@
       </div>
     </div>
     <aside class="side side-right">
-      <!-- Think aloud (ui/lab.js): notes for each play, sent with it to the play-lab server, and Claude's questions. -->
-      <section class="lab off" id="lab" aria-label="Think aloud">
-        <h2 class="lab-title">Think aloud <span class="lab-status" id="labStatus">Not recording</span></h2>
-        <p class="lab-shuffle" id="labShuffle" hidden></p>
-        <div class="lab-question" id="labQuestion" hidden>
-          <p class="lab-q-head">Claude asks <span id="labQMove"></span></p>
-          <p class="lab-q-text" id="labQText"></p>
-          <textarea id="labAnswer" rows="2" aria-label="Your answer" placeholder="Your answer"></textarea>
-          <div class="lab-row">
-            <button class="btn small" id="labAnswerMic" type="button">Speak</button>
-            <button class="btn small" id="labAnswerSend" type="button">Send answer</button>
-          </div>
-        </div>
-        <label class="lab-label" for="labNote">Why this play? <span>Goes with your next play</span></label>
-        <textarea id="labNote" rows="3" placeholder="Optional: say or type your reason"></textarea>
-        <div class="lab-row">
-          <button class="btn small" id="labNoteMic" type="button">Speak</button>
-          <button class="btn small" id="labNoteSend" type="button">Add note now</button>
-        </div>
-      </section>
       <div class="controls">
       <form class="settings" id="settingsForm" aria-label="Game settings">
         <label class="field"><span>High card</span><select id="highestSel"></select></label>

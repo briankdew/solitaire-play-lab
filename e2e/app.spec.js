@@ -376,7 +376,7 @@ test.describe('settings', () => {
 });
 
 test.describe('layout', () => {
-  for (const [width, where] of [[1400, 'left'], [1000, 'left'], [800, 'below'], [400, 'below']]) {
+  for (const [width, where] of [[1400, 'left'], [1100, 'left'], [1000, 'below'], [800, 'below'], [400, 'below']]) {
     test(`at ${width}px the record is ${where} of the table, with no sideways scroll`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await openApp(page);

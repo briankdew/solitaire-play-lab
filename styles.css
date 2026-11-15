@@ -53,8 +53,8 @@ body {
 }
 
 /* ---------- page layout ----------
-   The play area keeps its width (648px) in the middle; the left column is kept free for the
-   record carousel, and the settings, buttons and How to play stack on the right. */
+   The play area keeps its width (648px) in the middle; the left column holds Think aloud above
+   the record carousel, and the settings, buttons and How to play stack on the right. */
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 648px) minmax(0, 1fr);
@@ -63,27 +63,33 @@ body {
   align-items: start;
 }
 .layout > .status { grid-column: 2; grid-row: 1; }
-.side-left { grid-column: 1; grid-row: 1 / span 2; justify-self: end; margin-right: 32px; }   /* twice the column gap, like the right side */
+.side-left { grid-column: 1; grid-row: 1 / span 2; justify-self: end; margin-right: 32px; display: grid; gap: 22px; justify-items: center; align-content: start; }   /* twice the column gap, like the right side */
 .play { grid-column: 2; grid-row: 2; min-width: 0; }
 .side-right { grid-column: 3; grid-row: 1 / span 2; display: grid; gap: 22px; justify-items: start; max-width: 20rem; margin-left: 32px; }   /* twice the column gap from the table */
-/* The page narrows in steps. First the settings column moves below the record and the play area
-   (under the play area). The empty right column still balances the record's, so the play area
-   stays centered while there is room and only moves right when there is not. */
+/* The page narrows in steps. First the settings column moves below the play area, and the play
+   area moves right, so the left column (Think aloud and the record) gets all the room left over;
+   Think aloud widens to fill it. */
 @media (max-width: 1160px) {   /* below this the settings column no longer fits (allowing for a scrollbar) */
-  .layout { grid-template-columns: minmax(max-content, 1fr) minmax(0, 648px) minmax(0, 1fr); grid-template-rows: auto auto auto; }
+  .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 648px); grid-template-rows: auto auto auto; }
+  .side-left { grid-row: 1 / span 3; justify-self: stretch; }
+  .side-left .lab { width: 100%; max-width: 36rem; justify-self: end; }
+  .app > .top { justify-self: end; }   /* the heading stays above the play area as it moves right */
   .side-right { grid-column: 2; grid-row: 3; max-width: none; margin-left: 0; margin-top: 14px; }
 }
-/* Then the record moves below the play area too, to the left of the settings column. */
-@media (max-width: 900px) {   /* record 130px + 64px + play area 648px + padding + scrollbar; keep narrowLayout in step */
+/* Then the left column moves below the play area too, to the left of the settings column. */
+@media (max-width: 1000px) {   /* Think aloud 16rem + 64px + play area 648px + padding + scrollbar; keep narrowLayout in step */
   .layout { grid-template-columns: max-content minmax(0, 1fr); grid-template-rows: none; width: 100%; max-width: 648px; justify-self: center; }
   .layout > .status, .play { grid-column: 1 / -1; grid-row: auto; }
   .side-left { grid-column: 1; grid-row: 3; justify-self: start; margin-top: 14px; }
+  .side-left .lab { width: 18rem; max-width: none; justify-self: center; }
+  .app > .top { justify-self: center; }
   .side-right { grid-column: 2; grid-row: 3; }
 }
-/* Phones: too narrow for the record beside the settings, so everything stacks (stackedLayout). */
+/* Phones: too narrow for the left column beside the settings, so everything stacks (stackedLayout). */
 @media (max-width: 440px) {
   .layout { grid-template-columns: minmax(0, 1fr); }
-  .side-left { grid-column: 1; grid-row: 3; justify-self: center; margin-right: 0; }
+  .side-left { grid-column: 1; grid-row: 3; justify-self: stretch; margin-right: 0; }
+  .side-left .lab { width: 100%; }
   .side-right { grid-column: 1; grid-row: 4; margin-top: 14px; }
 }
 
@@ -391,7 +397,7 @@ body {
   font-display: block;
 }
 .record { display: grid; justify-items: center; gap: 8px; }
-.record-title {   /* styled like the setting labels, and lined up with High card (layoutRecord) */
+.record-title {   /* styled like the setting labels */
   margin: 0; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted);
 }
 .record-frame {
