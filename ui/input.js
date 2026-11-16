@@ -1,9 +1,9 @@
 // Pointer, button and keyboard input.
 import { DRAG_THRESHOLD, G, S, Z, say } from './shared.js';
-import { board, confirmCancel, confirmContinue, confirmModal, diagramBtn, endGameBtn, newBtn, newDealBtn, quitBtn, quitGameBtn, restartBtn, sameDealBtn, undoBtn } from './dom.js';
+import { board, confirmCancel, confirmContinue, confirmModal, diagramBtn, endGameBtn, pauseGameBtn, newBtn, newDealBtn, quitBtn, quitGameBtn, restartBtn, sameDealBtn, undoBtn } from './dom.js';
 import { basePos, cardEls, dealBtn, render, slots } from './table.js';
 import { toggleDiagram } from './diagram.js';
-import { closeConfirm, dealShuffle, drawFromStock, endGame, newDealNow, newShuffle, playByClick, quitGame, restartGame, tryMove, undo } from './actions.js';
+import { closeConfirm, dealShuffle, drawFromStock, endGame, pauseGame, newDealNow, newShuffle, playByClick, quitGame, restartGame, tryMove, undo } from './actions.js';
 
 /* ---------- pointer: tap and drag ---------- */
 
@@ -77,6 +77,7 @@ slots.stock.addEventListener('click', drawFromStock);
 newBtn.addEventListener('click', newShuffle);
 quitGameBtn.addEventListener('click', quitGame);
 endGameBtn.addEventListener('click', endGame);
+pauseGameBtn.addEventListener('click', pauseGame);
 confirmContinue.addEventListener('click', () => closeConfirm(true));
 confirmCancel.addEventListener('click', () => closeConfirm(false));
 // Keep keyboard focus inside the dialog while it's open; Escape does not dismiss it.

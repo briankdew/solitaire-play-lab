@@ -3,8 +3,7 @@
 Items raised for later. The player decides when each is taken up; each starts with a discussion.
 
 ## Next
-- **Restart the Play Lab server after the current game** (Ctrl+C, then `playlab`) so the reason-code menu lists every code: the running server predates `/api/codes`.
-- **Pause game:** stop a game on purpose and pick it up later, from a new **Paused games** tab in Played shuffle. To settle: is time away left out of think time; can several games be paused at once; what happens to a paused game if the same shuffle is replayed fresh. (Raised 2026-11-16.)
+- **Restart the Play Lab server after the current game** (Ctrl+C, then `playlab`) so the reason-code menu lists every code and Pause game / Resume work: the running server predates `/api/codes` and `/api/paused`.
 
 ## Later
 - **Play profiles:** play or replay shuffles with different strategies, or let other people play and record their reasoning. To settle: is a profile a person, a strategy or both; a reason vocabulary per profile (clean slate per player); how profiles show in logs, Played shuffle and the tools; how they relate to exploratory games. (Raised 2026-11-16.)

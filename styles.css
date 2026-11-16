@@ -123,9 +123,8 @@ body {
 .controls { display: grid; gap: 22px; width: max-content; max-width: 100%; }
 /* The game controls sit in the left column under Think aloud, as wide as it: compact buttons that
    wrap and share each row. */
-.toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 18rem; max-width: 100%; }   /* 2 / 2 / 1 buttons */
+.toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 18rem; max-width: 100%; }   /* 2 / 2 / 2 buttons */
 .toolbar .btn { font-size: 0.85rem; padding: 7px 10px; }
-#endGameBtn { grid-column: 1 / -1; }
 .btn {
   font: 600 0.9rem/1 var(--font-ui);
   color: var(--ink);

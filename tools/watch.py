@@ -53,6 +53,10 @@ def describe(e):
     if t == "mark":
         return (f"MARK after #{e.get('after')}: now EXPLORATORY (discuss when asked)" if e.get("exploratory")
                 else f"MARK after #{e.get('after')}: now a method game (back to the usual rules)")
+    if t == "pause":
+        return f"PAUSE after #{e.get('after')} ({e.get('moves')} moves): the game will be resumed later" + (f' | note: "{e["note"]}"' if e.get("note") else "")
+    if t == "resume":
+        return f"RESUME after #{e.get('after')} ({e.get('moves')} moves): the game continues; think time restarts"
     if t == "undo":
         return f"UNDO #{e.get('undoes')}" + (" (take-back)" if e.get("retake") else "") + (f' | note: "{e["note"]}"' if e.get("note") else "")
     if t == "note":

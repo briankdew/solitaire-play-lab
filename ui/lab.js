@@ -35,11 +35,12 @@ let done = [];        // the actions not undone, newest last: { n, kind, note }
 let lastAt = 0;       // when the last action (or the deal) happened
 let question = null;  // the question showing
 let queue = Promise.resolve();
+let replaying = false;   // rebuilding a paused game from its log: nothing is sent, notes come from the log
 
 /* ---------- sending ---------- */
 
 function send(event, onReply) {
-  if (!recording || !game) return;
+  if (!recording || !game || replaying) return;
   const body = JSON.stringify({ game: game.id, event });
   queue = queue.then(() => fetch('/api/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }))
     .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -52,7 +53,7 @@ let shuffleId = null;   // the shuffle being played, from the server
 function showShuffle(reply) {
   shuffleId = reply && reply.shuffle ? reply.shuffle : null;
   if (!reply || !reply.shuffle) { shuffleEl.hidden = true; return; }
-  const times = reply.first_deal ? 'new' : `game ${reply.plays} of this shuffle`;
+  const times = reply.resumed ? 'resumed game' : reply.first_deal ? 'new' : `game ${reply.plays} of this shuffle`;
   const mirror = reply.mirror_of && reply.mirror_of.length ? ` · mirror of ${reply.mirror_of[0]}` : '';
   shuffleEl.innerHTML = '';
   const b = document.createElement('b');
@@ -123,7 +124,7 @@ export function onDeal(state, deck) {
  * An action: a card played (`token.type` 'move') or a turn of the stock ('turn'). `prev` is the
  * position the player saw, `next` the position after. `auto` marks the automatic finish's moves.
  */
-export function onAction(prev, next, token, { auto = false, retake = false } = {}) {
+export function onAction(prev, next, token, { auto = false, retake = false, note } = {}) {
   if (!game || !token) return;
   const kind = token.type === 'move' ? 'move' : 'turn';
   const key = kind === 'move' ? token.card + token.to : 's';
@@ -144,7 +145,7 @@ export function onAction(prev, next, token, { auto = false, retake = false } = {
     view: P.describe(prev),
     plays,
     choices: plays.length,
-    note: auto ? undefined : takeNote(),
+    note: replaying ? note : auto ? undefined : takeNote(),
   };
   if (auto) event.auto = true;
   if (retake) event.retake = true;
@@ -169,9 +170,9 @@ export function mark() {
 
 /** Undo went back to `toMark` (see mark()): every action after it is taken back, newest first. */
 export function onUndo(toMark) {
-  if (game) game.ended = false;   // only a win can be undone (End game and Forfeit can't)
+  if (game && !replaying) game.ended = false;   // only a win can be undone (End game and Forfeit can't)
   const target = toMark == null ? done.length - 1 : toMark;
-  sinceLast();
+  if (!replaying) sinceLast();
   let back;   // the note of the play taken back (the oldest, if several)
   while (done.length > Math.max(0, target)) {
     const last = done.pop();
@@ -182,7 +183,7 @@ export function onUndo(toMark) {
   }
   // A note being typed stays in the box for the play made instead; with none, the undone play's
   // note goes back in the box so that play picks it up (or it can be edited).
-  if (back && !noteEl.value.trim()) noteEl.value = back;
+  if (back && !replaying && !noteEl.value.trim()) noteEl.value = back;
 }
 
 /** The click-again take-back: the last move (to a foundation) is replaced by a move to a column. */
@@ -209,6 +210,42 @@ export function onEnd(result) {
     exploratory: exploreChk.checked,
     note: takeNote(),
   });
+}
+
+/** Pause game: the game stops here, to be resumed from Played shuffle → Paused games. */
+export function onPause() {
+  if (!game || game.ended) return;
+  send({ type: 'pause', moves: S.moves, after: done.length ? done[done.length - 1].n : 0, note: takeNote() });
+  game.ended = true;   // dealing another game doesn't mark this one abandoned
+}
+
+/**
+ * Resuming a paused game: resumeBegin() before its actions are replayed (through onAction and
+ * onUndo, which then send nothing), resumeEnd() after. The game keeps its ID, numbers and log;
+ * think time starts again from the resume, so time away isn't counted.
+ */
+export function resumeBegin(id, events) {
+  if (game && !game.ended) send({ type: 'end', result: 'abandoned', moves: S.moves });
+  game = { id, ended: false };
+  panel.dataset.game = id;
+  n = 0;
+  moveNo = 0;
+  done = [];
+  S.undoneSeq = [];
+  replaying = true;
+  const deal = events[0] || {};
+  showShuffle({ shuffle: deal.shuffle, resumed: true });
+  let explore = !!deal.exploratory;
+  for (const e of events) if ((e.type === 'mark' || e.type === 'end') && 'exploratory' in e) explore = !!e.exploratory;
+  exploreChk.checked = explore;
+  showExploratory();
+}
+export function resumeEnd(ok) {
+  replaying = false;
+  if (!ok) return;
+  lastAt = performance.now();
+  send({ type: 'resume', moves: S.moves, after: done.length ? done[done.length - 1].n : 0 });
+  showStatus();
 }
 
 /** The shuffle of the game in play (it can't be deleted while it's being played), or null. */

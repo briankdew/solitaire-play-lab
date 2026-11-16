@@ -223,6 +223,68 @@ export function quitGame() {
   render();
 }
 
+// Pause game: stop here on purpose, to pick the game up later (Played shuffle → Paused games).
+export function pauseGame() {
+  if (S.busy || !inPlay()) return;
+  lab.onPause();
+  S.closed = true;
+  S.drag = null;
+  winPanel.hidden = true;
+  say('Game paused. Resume it any time from Played shuffle → Paused.');
+  render();
+}
+
+/**
+ * Resume a paused game from its log: deal its deck, then replay its actions (and undos) in order,
+ * so the table, the Game Recorder, Undo and the play lab's numbering are as they were.
+ * Returns false (and leaves a message) if the log doesn't replay.
+ */
+export function resumeGame(id, events) {
+  const deal = events[0];
+  const settings = G.normalizeSettings(deal.settings);
+  const prepared = G.prepareDeck(deal.deck.map((c) => ({ ...G.parseCard(c), faceUp: false })), settings);
+  S.settings = settings;
+  prepareNewShuffle(prepared);
+  S.state = G.dealPending(S.state);
+  S.history = [];
+  S.record = G.dealTokens(S.state);
+  S.moves = 0;
+  lab.resumeBegin(id, events);
+  let ok = true;
+  for (const e of events) {
+    if (e.type === 'undo') {
+      const prev = S.history.pop();
+      if (!prev) { ok = false; break; }
+      lab.onUndo(prev.labMark);
+      S.state = prev.state;
+      S.moves = prev.moves;
+      if (S.record && prev.recLen != null) S.record.length = prev.recLen;
+    } else if (e.type === 'move' || e.type === 'turn') {
+      let next; let token;
+      if (e.key === 's') {
+        next = G.draw(S.state);
+        token = next && G.turnToken(S.state, next);
+      } else {
+        const p = window.LabPlays.plays(S.state).find((x) => x.key === e.key);
+        next = p && G.move(S.state, p.from, p.to);
+        token = next && G.moveToken(S.state, p.from, p.to);
+      }
+      if (!next) { ok = false; break; }
+      S.history.push({ state: S.state, moves: S.moves, recLen: S.record && S.record.length, labMark: lab.mark() });
+      lab.onAction(S.state, next, token, { auto: !!e.auto, retake: !!e.retake, note: e.note });
+      addToken(token);
+      S.state = next;
+      if (e.type === 'move') S.moves++;
+    }
+  }
+  lab.resumeEnd(ok);
+  S.closed = !ok;
+  S.suppressAuto = true;
+  say(ok ? 'Game resumed where you paused it. Good luck!' : 'This game could not be rebuilt from its log.');
+  render();
+  return ok;
+}
+
 // End game: stop play and record a loss (W/L and the moves). Like Forfeit, it can't be undone.
 export function endGame() {
   if (S.busy || !inPlay()) return;

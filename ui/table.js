@@ -1,6 +1,6 @@
 // The card table: piles, card faces, layout and drawing the game.
 import { G, PIPS, S, Z, inPlay, rankLabel, top } from './shared.js';
-import { board, endGameBtn, newBtn, quitGameBtn, restartBtn, tableWrap, undoBtn } from './dom.js';
+import { board, endGameBtn, newBtn, pauseGameBtn, quitGameBtn, restartBtn, tableWrap, undoBtn } from './dom.js';
 import { layoutRecord, placeUndo } from './layout.js';
 import { updateDiagram } from './diagram.js';
 import { renderRecord } from './record.js';
@@ -251,6 +251,7 @@ export function render() {
   newBtn.disabled = S.busy;
   quitGameBtn.disabled = S.busy || S.closed;
   endGameBtn.disabled = S.busy || !inPlay();
+  pauseGameBtn.disabled = S.busy || !inPlay();
   updateDiagram();
 }
 

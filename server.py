@@ -93,6 +93,35 @@ def codes_list():
     return {"items": items}
 
 
+def paused_state(events):
+    """'paused' if the game's last pause has no later resume or end, else None."""
+    state = None
+    for e in events:
+        t = e.get("type")
+        if t == "pause":
+            state = "paused"
+        elif t in ("resume", "end"):
+            state = None
+    return state
+
+
+def paused_list():
+    """Games paused with Pause game and not yet resumed or ended, newest first (no cards)."""
+    items = []
+    for name in os.listdir(GAMES):
+        if not name.endswith(".jsonl") or name == "index.jsonl":
+            continue
+        events = read_lines(os.path.join(GAMES, name))
+        if not events or events[0].get("type") != "deal" or paused_state(events) != "paused":
+            continue
+        pause = [e for e in events if e.get("type") == "pause"][-1]
+        deal = events[0]
+        items.append({"game": name[:-6], "shuffle": deal.get("shuffle"), "setup": deal.get("setup"),
+                      "moves": pause.get("moves"), "actions": pause.get("after"), "t": pause.get("t")})
+    items.sort(key=lambda x: x.get("t") or "", reverse=True)
+    return {"items": items}
+
+
 GAME_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$")
 MAX_BODY = 1_000_000
 lock = threading.Lock()
@@ -191,6 +220,18 @@ class Handler(SimpleHTTPRequestHandler):
         if path == "/api/deleted":
             with lock:
                 return self.send_json(deleted_list())
+        if path == "/api/paused":
+            with lock:
+                return self.send_json(paused_list())
+        if path == "/api/game":
+            # A paused game's log (with its deck), to resume it. Only paused games: a game in play or
+            # finished isn't handed out here.
+            game = args.get("id", "")
+            with lock:
+                events = read_lines(os.path.join(GAMES, game + ".jsonl")) if GAME_ID.match(game) else []
+                if not events or paused_state(events) != "paused":
+                    return self.send_json({"error": "no such paused game"}, 404)
+                return self.send_json({"game": game, "events": events})
         if path == "/api/codes":
             with lock:
                 return self.send_json(codes_list())
@@ -259,7 +300,7 @@ class Handler(SimpleHTTPRequestHandler):
                 reply.update({"shuffle": rec["id"], "first_deal": first, "plays": INDEX.stats(rec)["plays"],
                               "mirror_of": INDEX.mirror_of(rec)})
             append_line(file, event)
-            if event.get("type") == "deal":
+            if event.get("type") in ("deal", "resume"):
                 write_json(CURRENT, {"game": game, "file": os.path.relpath(file, os.path.dirname(GAMES)), "started": event["t"]})
             if event.get("type") == "mark":
                 INDEX.mark(game, event.get("exploratory"), event["t"])

@@ -30,6 +30,7 @@ export const labPanel = document.getElementById('lab');   // Think aloud, at the
 export const labTitle = labPanel.querySelector('.lab-title');
 export const stepsEl = document.getElementById('steps');
 export const endGameBtn = document.getElementById('endGameBtn');
+export const pauseGameBtn = document.getElementById('pauseGameBtn');
 export const copyRecordBtn = document.getElementById('copyRecordBtn');
 export const diagramBtn = document.getElementById('diagramBtn');
 export const diagramEl = document.getElementById('diagram');

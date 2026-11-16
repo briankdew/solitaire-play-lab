@@ -1,11 +1,12 @@
 // Played shuffle: the shuffles dealt in the play lab (from server.py), in three sections:
 //   Method games  shuffles with games that count toward the model
 //   Exploratory   shuffles with exploratory games (a shuffle can be in both)
+//   Paused        games stopped with Pause game, to be resumed
 //   Deleted       deleted shuffles, which can be restored
 // Each row has the shuffle ID, how often it was played and how those games ended, and buttons to
 // replay or delete it (or restore it). Shows no cards: a deck order is fetched only to replay it.
 import { G, S, inPlay, say } from './shared.js';
-import { confirmReshuffle, dealShuffle, prepareNewShuffle } from './actions.js';
+import { confirmReshuffle, dealShuffle, prepareNewShuffle, resumeGame } from './actions.js';
 import { applySettings } from './settings.js';
 import { shuffleInPlay } from './lab.js';
 
@@ -22,7 +23,7 @@ const moreBtn = el('replayMore');
 const closeBtn = el('replayClose');
 
 const PAGE = 50;
-let kind = 'method';   // 'method' | 'exploratory' | 'deleted'
+let kind = 'method';   // 'method' | 'exploratory' | 'paused' | 'deleted'
 let items = [];
 let total = 0;
 let busy = false;
@@ -69,8 +70,11 @@ function row(s) {
   const info = document.createElement('div');
   const actions = document.createElement('div');
   actions.className = 'replay-actions';
-  info.append(textEl('replay-id', s.id));
-  if (kind === 'deleted') {
+  info.append(textEl('replay-id', s.id || s.shuffle));
+  if (kind === 'paused') {
+    info.append(textEl('replay-meta', `${plural(s.moves || 0, 'move')} · paused ${dateOf(s.t)} ${s.t ? s.t.slice(11, 16) : ''}`));
+    actions.append(button('Resume', () => resume(s.game)));
+  } else if (kind === 'deleted') {
     info.append(textEl('replay-meta', `${plural(s.games, 'game')} · deleted ${dateOf(s.t)}`));
     actions.append(button('Restore', () => restore(s.id)));
   } else {
@@ -104,9 +108,9 @@ function askDelete(li, s) {
 function render() {
   listEl.replaceChildren(...items.map(row));
   const empty = searchEl.value.trim() ? 'No shuffle matches.'
-    : kind === 'deleted' ? 'No deleted shuffles with this setup.'
+    : kind === 'deleted' ? 'No deleted shuffles with this setup.' : kind === 'paused' ? 'No paused games with this setup.'
       : kind === 'exploratory' ? 'No exploratory games with this setup yet.' : 'No shuffles played with this setup yet.';
-  countEl.textContent = total ? `${plural(total, 'shuffle')}${items.length < total ? `, showing ${items.length}` : ''}` : empty;
+  countEl.textContent = total ? `${plural(total, kind === 'paused' ? 'paused game' : 'shuffle')}${items.length < total ? `, showing ${items.length}` : ''}` : empty;
   moreBtn.hidden = items.length >= total;
 }
 
@@ -127,7 +131,14 @@ async function load(reset) {
   listEl.setAttribute('aria-busy', 'true');   // until the newest load has shown
   const base = reset ? [] : items;
   try {
-    if (kind === 'deleted') {
+    if (kind === 'paused') {
+      const q = searchEl.value.trim().toLowerCase();
+      const all = (await getJson('/api/paused')).items.filter((d) => d.setup === setupSel.value &&
+        (!q || (/^\d+$/.test(q) ? Number((d.shuffle || '').split('-')[1]) === Number(q) : (d.shuffle || '').toLowerCase().includes(q))));
+      if (seq !== loadSeq) return;
+      items = all;
+      total = all.length;
+    } else if (kind === 'deleted') {
       // Deleted shuffles are few: filter them here, by setup and by counter or part of the ID.
       const q = searchEl.value.trim().toLowerCase();
       const all = (await getJson('/api/deleted')).items.filter((d) => setupOfId(d.id) === setupSel.value &&
@@ -154,7 +165,9 @@ async function load(reset) {
 async function fillSetups() {
   let counts = {};
   try {
-    if (kind === 'deleted') {
+    if (kind === 'paused') {
+      for (const d of (await getJson('/api/paused')).items) counts[d.setup] = (counts[d.setup] || 0) + 1;
+    } else if (kind === 'deleted') {
       for (const d of (await getJson('/api/deleted')).items) counts[setupOfId(d.id)] = (counts[setupOfId(d.id)] || 0) + 1;
     } else {
       counts = await getJson(`/api/setups?kind=${kind}`);
@@ -210,6 +223,22 @@ async function replay(id) {
     say(`Replaying shuffle ${s.id}. Good luck!`);
   } catch {
     countEl.textContent = 'Could not load that shuffle: is ./play still running?';
+  } finally {
+    busy = false;
+  }
+}
+
+async function resume(gameId) {
+  if (busy || S.busy) return;
+  busy = true;
+  try {
+    const data = await getJson(`/api/game?id=${encodeURIComponent(gameId)}`);
+    modal.hidden = true;
+    if (inPlay() && !(await confirmReshuffle())) { modal.hidden = false; return; }
+    applySettings(data.events[0].settings);
+    resumeGame(data.game, data.events);
+  } catch {
+    countEl.textContent = 'Could not load that game: is ./play still running?';
   } finally {
     busy = false;
   }
