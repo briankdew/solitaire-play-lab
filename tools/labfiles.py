@@ -149,7 +149,7 @@ def play_fact(view, key):
     player's new_play code: a run moved from one face-up card to another is useful only when the
     card it frees is immediately playable (home, or onto another column); a play home is always new.
     Returns (fact, new).
-    Facts: 'w' (from the waste), 'h' (from home), 'reveals' (turns a face-down card over),
+    Facts: 'w' (from the waste), 'from h' (back off home: not new), 'reveals' (turns a face-down card over),
     'empties d' (leaves column d empty), 'frees 8♣: playable' / 'frees 8♣: no play'."""
     if key == "s" or not view:
         return "", False
@@ -157,7 +157,7 @@ def play_fact(view, key):
     if view.get("waste") and view["waste"][-1] == card:
         return "w", True
     if card in (view.get("home") or []):
-        return "h", True
+        return "from h", False   # taking a card back off home is never counted as a new play
     cols = view.get("cols") or []
     letters = "abcdefghijklmnopqrstuvwxyz"
     for i, c in enumerate(cols):
