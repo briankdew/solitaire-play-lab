@@ -69,10 +69,12 @@ def game_path(game_id):
 
 
 def current_game():
-    """The game being played (or last played), from live/current.json, else the newest log."""
+    """The game being played (or last played), from live/current.json (None if it was deleted), else the newest log."""
     cur = read_json(CURRENT, {}) or {}
-    if cur.get("game") and os.path.exists(game_path(cur["game"])):
-        return cur["game"]
+    if cur.get("game"):
+        # A current game whose log is gone was deleted (Played shuffle → Delete): there is no game in
+        # play, so don't fall back to an older one (watch.py would replay it).
+        return cur["game"] if os.path.exists(game_path(cur["game"])) else None
     return newest_game()
 
 
