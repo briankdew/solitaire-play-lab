@@ -48,6 +48,23 @@ test.describe('think aloud', () => {
     expect(first.view).toEqual({ stock: 2, waste: ['3S', 'AH', '2S'], under: 0, cols: [{ down: 0, up: ['AS'] }, { down: 1, up: ['4H'] }], home: [null, null] });
   });
 
+  test('the one-click notes fill the note box, and the note goes with the next play', async ({ page }) => {
+    await openApp(page);
+    await pickShuffle(page, SCREENSHOT_DEAL);
+    await deal(page);
+    await page.locator('#labQuick button', { hasText: 'Only play' }).click();
+    await expect(page.locator('#labNote')).toHaveValue('Only play');
+    await stock(page).click();
+    await settle(page);
+    await page.locator('#labNote').fill('Nothing new:');
+    await page.locator('#labQuick button', { hasText: 'NNP' }).click();
+    await expect(page.locator('#labNote')).toHaveValue('Nothing new: NNP');
+    await stock(page).click();
+    await settle(page);
+    const turns = (await eventsOf(page, 3)).filter((e) => e.type === 'turn');
+    expect(turns.map((e) => e.note)).toEqual(['Only play', 'Nothing new: NNP']);
+  });
+
   test('Undo puts the undone play\'s note back in the note box, for the play made instead', async ({ page }) => {
     await openApp(page);
     await pickShuffle(page, SCREENSHOT_DEAL);

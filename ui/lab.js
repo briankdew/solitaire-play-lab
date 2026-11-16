@@ -324,6 +324,13 @@ async function start() {
   speech(noteMic, noteEl);
   speech(answerMic, answerEl);
   noteSend.addEventListener('click', sendNoteNow);
+  // One-click notes: the text goes in the box (after anything typed), and with the next play.
+  for (const b of el('labQuick').querySelectorAll('button')) {
+    b.addEventListener('click', () => {
+      const typed = noteEl.value.trim();
+      noteEl.value = typed ? `${typed} ${b.dataset.note}` : b.dataset.note;
+    });
+  }
   answerSend.addEventListener('click', sendAnswer);
   for (const box of [noteEl, answerEl]) {
     box.addEventListener('keydown', (e) => {

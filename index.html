@@ -40,7 +40,14 @@
             <button class="btn small" id="labAnswerSend" type="button">Send answer</button>
           </div>
         </div>
-        <label class="lab-label" for="labNote">Why this play? <span>Goes with your next play</span></label>
+        <div class="lab-note-head">
+          <label class="lab-label" for="labNote">Why this play? <span>Goes with your next play</span></label>
+          <!-- One-click notes: fill the box (or add to it) for the next play. -->
+          <span class="lab-quick" id="labQuick">
+            <button class="btn small" type="button" data-note="Only play">Only play</button>
+            <button class="btn small" type="button" data-note="NNP" title="No new play">NNP</button>
+          </span>
+        </div>
         <textarea id="labNote" rows="3" placeholder="Optional: say or type your reason"></textarea>
         <div class="lab-row">
           <button class="btn small" id="labNoteMic" type="button">Speak</button>

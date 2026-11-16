@@ -557,7 +557,9 @@ body {
 }
 .lab textarea::placeholder { color: var(--ink-muted); }
 .lab textarea:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
-.lab-row { display: flex; gap: 8px; justify-content: flex-end; }
+.lab-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.lab-note-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.lab-quick { display: flex; gap: 8px; flex: none; }   /* one-click notes, beside the label */
 .lab .btn.on { background: var(--back); border-color: var(--back); color: var(--card); }
 .lab-question {
   display: grid; gap: 6px; padding: 10px; border-radius: 8px;
