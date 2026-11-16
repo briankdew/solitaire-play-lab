@@ -302,6 +302,14 @@
           "until": "2026-11-16"
         }
       ]
+    },
+    {
+      "code": "dead_end",
+      "name": "Dead end",
+      "definition": "No pending progressive plays on the tableau or to/from the foundation, and a new full stock turn completed with no new plays becoming available: I select End game.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
     }
   ]
 }
