@@ -58,8 +58,9 @@ def overall():
             if d.get("note") or more.get(d["n"]) or ann.get((g, d["n"])):
                 explained += 1
         undone += sum(1 for e in events if e.get("type") == "undo")
-    for (g, _), items in ann.items():
-        if g in games:
+    standing = {g: {a["n"] for a in L.standing_actions(L.read_lines(L.game_path(g)))[0]} for g in games}
+    for (g, n), items in ann.items():
+        if g in games and n in standing[g]:   # codes on undone plays don't count
             for a in items:
                 codes.update(a.get("codes", []))
     print(f"{len(games)} finished method games: " + ", ".join(f"{k} {v}" for k, v in results.items())
@@ -96,7 +97,7 @@ def one_game(game):
         for x in more.get(a["n"], []):
             print(f"   {x}")
         for x in ann.get((game, a["n"]), []):
-            print(f"   coded {', '.join(x['codes'])} ({x['source']}): {x.get('summary') or ''}")
+            print(f"   coded{' (not counted: undone)' if a['undone'] else ''} {', '.join(x['codes'])} ({x['source']}): {x.get('summary') or ''}")
         if a.get("revealed"):
             print(f"   revealed {L.card_text(a['revealed'])}")
     gaps = [a for a in L.decisions(events) if not a.get("note") and not more.get(a["n"]) and not ann.get((game, a["n"]))]

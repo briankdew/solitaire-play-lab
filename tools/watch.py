@@ -21,6 +21,11 @@ def secs(ms):
     return f"{(ms or 0) / 1000:.1f}s"
 
 
+def _plays(e):
+    text, new = L.plays_facts_text(e)
+    return text, e.get("choices", 0), new
+
+
 def describe(e):
     t = e.get("type")
     if t == "deal":
@@ -36,7 +41,7 @@ def describe(e):
         num = f" move {e['move_no']}" if e.get("move_no") else ""
         parts = [f"{tag} #{e.get('n')}{num}{who}: {e.get('text')} ({e.get('token')}) after {secs(e.get('think_ms'))}",
                  f"saw {L.view_text(e.get('view'))}",
-                 f"plays: {L.plays_text(e)} ({e.get('choices', 0)} choices)"]
+                 "plays: {} ({} choices) | new: {}".format(*_plays(e))]
         if e.get("retake"):
             parts.append("take-back to a column")
         if e.get("revealed"):

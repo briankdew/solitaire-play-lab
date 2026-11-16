@@ -135,6 +135,68 @@ def plays_text(e):
     return " | ".join(p["text"] for p in e.get("plays") or []) or "(none)"
 
 
+RANKS = "A23456789XJQK"
+RED = set("HD")
+
+
+def _fits_on(card, target):
+    """card can go on target in a column: one rank lower, the other colour."""
+    return (RANKS.index(card[0]) + 1 == RANKS.index(target[0])) and ((card[1] in RED) != (target[1] in RED))
+
+
+def play_fact(view, key):
+    """What a play does, from the visible position only, and whether it is a "new play" under the
+    player's new_play code: a run moved from one face-up card to another is useful only when the
+    card it frees is immediately playable (home, or onto another column); a play home is always new.
+    Returns (fact, new).
+    Facts: 'w' (from the waste), 'h' (from home), 'reveals' (turns a face-down card over),
+    'empties d' (leaves column d empty), 'frees 8♣: playable' / 'frees 8♣: no play'."""
+    if key == "s" or not view:
+        return "", False
+    card, dest = key[:2], key[2:]
+    if view.get("waste") and view["waste"][-1] == card:
+        return "w", True
+    if card in (view.get("home") or []):
+        return "h", True
+    cols = view.get("cols") or []
+    letters = "abcdefghijklmnopqrstuvwxyz"
+    for i, c in enumerate(cols):
+        up = c.get("up") or []
+        if card not in up:
+            continue
+        k = up.index(card)
+        if k == 0:
+            return ("reveals", True) if c.get("down") else (f"empties {letters[i]}", True)
+        freed = up[k - 1]
+        home_ok = freed[0] == "A" or any(h and h[1] == freed[1] and RANKS.index(h[0]) + 1 == RANKS.index(freed[0])
+                                         for h in view.get("home") or [])
+        col_ok = False
+        for j, o in enumerate(cols):
+            if j == i or letters[j] == dest:
+                continue
+            o_up = o.get("up") or []
+            if o_up and _fits_on(freed, o_up[-1]):
+                col_ok = True
+            elif not o_up and not o.get("down") and freed[0] == "K" and not (k - 1 == 0 and not c.get("down")):
+                col_ok = True
+        ok = home_ok or col_ok
+        # The rule is about moves between columns: a play home is always new.
+        return f"frees {card_text(freed)}: {'playable' if ok else 'no play'}", ok or dest == "h"
+    return "", True
+
+
+def plays_facts_text(e):
+    """The plays with what each does: '8♣c [frees 9♥: no play] | 9♣e [w] | s', then the new ones."""
+    view = e.get("view")
+    parts, new = [], []
+    for p in e.get("plays") or []:
+        fact, is_new = play_fact(view, p["key"])
+        parts.append(p["text"] + (f" [{fact}]" if fact else ""))
+        if is_new:
+            new.append(p["text"])
+    return " | ".join(parts) or "(none)", " ".join(new) or "none (NNP)"
+
+
 def is_exploratory(events):
     """True if the game is exploratory: the last switch before it ended (deal, mark or end event)."""
     flag = False

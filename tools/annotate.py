@@ -87,9 +87,12 @@ def main():
     if unknown:
         sys.exit(f"Unknown code(s): {', '.join(unknown)}. Propose them first (--propose).")
     game = a.game or L.current_game()
-    action = next((e for e in L.read_lines(L.game_path(game)) if e.get("type") in ("move", "turn") and e.get("n") == a.n), None)
+    events = L.read_lines(L.game_path(game))
+    action = next((e for e in events if e.get("type") in ("move", "turn") and e.get("n") == a.n), None)
     if not action:
         sys.exit(f"No action #{a.n} in {game}.")
+    if any(e.get("type") == "undo" and e.get("undoes") == a.n for e in events):
+        print(f"Warning: #{a.n} was undone. Its codes are kept but not counted (code the play that replaced it).")
     L.append_line(L.ANNOTATIONS, {
         "t": L.now(), "game": game, "n": a.n, "key": action.get("key"), "play": action.get("text"),
         "codes": wanted, "source": a.source, "exploratory": L.is_exploratory(L.read_lines(L.game_path(game))), "quote": a.quote, "summary": a.summary, "confidence": a.confidence,
