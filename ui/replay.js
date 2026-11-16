@@ -1,4 +1,4 @@
-// Played shuffles: the shuffles dealt in the play lab (from server.py), in three sections:
+// Played shuffle: the shuffles dealt in the play lab (from server.py), in three sections:
 //   Method games  shuffles with games that count toward the model
 //   Exploratory   shuffles with exploratory games (a shuffle can be in both)
 //   Deleted       deleted shuffles, which can be restored
@@ -42,7 +42,7 @@ function resultsText(s) {
   const parts = [];
   if (s.W) parts.push(`won ${s.W}`);
   if (s.L) parts.push(`lost ${s.L}`);
-  if (s.quit) parts.push(`quit ${s.quit}`);
+  if (s.quit) parts.push(`forfeited ${s.quit}`);
   if (s.abandoned) parts.push(`left ${s.abandoned}`);
   return parts.join(', ');
 }

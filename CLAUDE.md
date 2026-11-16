@@ -22,7 +22,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 - In Claude Code, `/play` follows the game live and `/review` goes over a finished game. The command files are in `.claude/commands/`.
 - **Claude never coaches during play.** Don't suggest plays, evaluate a position aloud, or hint at hidden cards. Advice would change the data being collected.
 - **Never read hidden information during play.** The `deck` field of a log's deal event, and `games/index.jsonl`, hold shuffles. Read logs only through `tools/watch.py`, which leaves them out. Replaying a game from its deck (`lab/log.js`) is for finished games only.
-- **Replays.** A shuffle can be dealt again from **Played shuffles**; watch.py marks the deal `REPLAY`. While a replay is in play, don't read or mention earlier games of that shuffle.
+- **Replays.** A shuffle can be dealt again from **Played shuffle**; watch.py marks the deal `REPLAY`. While a replay is in play, don't read or mention earlier games of that shuffle.
 
 ## Question rules
 - **Ask when:**
@@ -51,7 +51,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | `lab/log.js` | Reading logs and replaying a game (Node). |
 | `server.py`, `play` | The local server and its start script. |
 | `shuffles.py`, `games/index.jsonl` | Shuffle IDs (`<setup>-<6-digit counter>-<12-hex fingerprint>`, e.g. `K473-000001-7f3a9c21d4e8`), mirror groups, each game's kind (method or exploratory), and the index of played shuffles (holds deck orders). `python3 shuffles.py --rebuild` rebuilds the index from the game logs. |
-| `games/deleted/<shuffle id>/` | Shuffles deleted from Played shuffles: their game logs, coded reasons and reviews, kept so a delete can be undone (Restore in Played shuffles → Deleted, or `python3 shuffles.py --restore ID` with ./play stopped). Not committed. Counter numbers are never reused. |
+| `games/deleted/<shuffle id>/` | Shuffles deleted from Played shuffle: their game logs, coded reasons and reviews, kept so a delete can be undone (Restore in Played shuffle → Deleted, or `python3 shuffles.py --restore ID` with ./play stopped). Not committed. Counter numbers are never reused. |
 | `games/*.jsonl` | One file per deal. Events: `deal` (settings, hidden `deck`, `shuffle`, `mirror`, `first_deal`, `exploratory`, `view`, `plays`), `mark` (`exploratory`, `after`), `move` / `turn` (`n`, `key`, `token`, `think_ms`, `view` before the play, `plays`, `choices`, `note`, `revealed`, `turned`, `auto`), `undo` (`undoes`), `note`, `answer`, `end` (`result` W / L / quit / abandoned, `exploratory`). |
 | `live/question.json`, `live/answers.jsonl` | The question channel (not committed). |
 | `catalog/reasons.json` | The reason vocabulary, empty at the start and built from the player's words. |

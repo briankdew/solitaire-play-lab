@@ -211,18 +211,19 @@ export function newDealNow() {
   dealShuffle();
 }
 
-// Quit: leave the table exactly as it is, with no more play until Restart deal or New shuffle.
+// Forfeit (and the win panel's Quit): leave the table exactly as it is, with no more play until Restart
+// deal or New shuffle. A game in play is logged as 'quit' (no result).
 export function quitGame() {
   if (S.busy || S.closed) return;
   if (inPlay()) lab.onEnd('quit');
   S.closed = true;
   S.drag = null;
   winPanel.hidden = true;
-  say('Game stopped. Choose Restart deal to replay this deal, or New shuffle to mix the cards.');
+  say('Game forfeited. Choose Restart deal to replay this deal, or New shuffle to mix the cards.');
   render();
 }
 
-// End game: stop play and record a loss (W/L and the moves). Like Quit, it can't be undone.
+// End game: stop play and record a loss (W/L and the moves). Like Forfeit, it can't be undone.
 export function endGame() {
   if (S.busy || !inPlay()) return;
   addToken(G.resultToken(S.record || [], false));

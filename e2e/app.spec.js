@@ -255,7 +255,7 @@ test.describe('finishing, take-backs and the win panel', () => {
     await win();
     await page.locator('#quitBtn').click();
     await expect(page.locator('#winPanel')).toBeHidden();
-    await expect(status(page)).toContainText('Game stopped');
+    await expect(status(page)).toContainText('Game forfeited');
     await page.locator('#restartBtn').click();
     await settle(page);
     await win();

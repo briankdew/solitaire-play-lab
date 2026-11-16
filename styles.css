@@ -125,6 +125,7 @@ body {
    wrap and share each row. */
 .toolbar { display: flex; flex-wrap: wrap; gap: 6px; width: 18rem; max-width: 100%; }
 .toolbar .btn { flex: 1 1 auto; font-size: 0.85rem; padding: 7px 10px; }
+#restartBtn, #newBtn { flex: 1 1 40%; }   /* the first row's two buttons, the same width */
 .btn {
   font: 600 0.9rem/1 var(--font-ui);
   color: var(--ink);
@@ -557,9 +558,10 @@ body {
 }
 .lab textarea::placeholder { color: var(--ink-muted); }
 .lab textarea:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
-.lab-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+/* Two-button rows: both buttons as wide as the wider one, at the right. */
+.lab-row { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; width: max-content; max-width: 100%; margin-left: auto; }
 .lab-note-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
-.lab-quick { display: flex; gap: 8px; flex: none; }   /* one-click notes, beside the label */
+.lab-quick { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; flex: none; }   /* one-click notes, beside the label */
 .lab .btn.on { background: var(--back); border-color: var(--back); color: var(--card); }
 .lab-question {
   display: grid; gap: 6px; padding: 10px; border-radius: 8px;

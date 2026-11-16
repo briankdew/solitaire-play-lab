@@ -164,7 +164,7 @@ export function mark() {
 
 /** Undo went back to `toMark` (see mark()): every action after it is taken back, newest first. */
 export function onUndo(toMark) {
-  if (game) game.ended = false;   // only a win can be undone (End game and Quit can't)
+  if (game) game.ended = false;   // only a win can be undone (End game and Forfeit can't)
   const target = toMark == null ? done.length - 1 : toMark;
   const note = takeNote();
   sinceLast();
@@ -192,7 +192,7 @@ export function onRetake(prev, next, token) {
   onAction(prev, next, token, { retake: true });
 }
 
-/** The game ended: 'W' (won), 'L' (End game) or 'quit'. */
+/** The game ended: 'W' (won), 'L' (End game) or 'quit' (Forfeit). */
 export function onEnd(result) {
   if (!game || game.ended) return;
   game.ended = true;
