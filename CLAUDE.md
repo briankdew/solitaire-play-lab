@@ -57,7 +57,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | `catalog/reasons.json` | The reason vocabulary, empty at the start and built from the player's words. |
 | `catalog/annotations.jsonl` | Claude's reading of each explained play. |
 | `catalog/reviews/` | One summary per reviewed game. |
-| `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py` (what the games hold). watch.py tags each play with what it does (`[w]`, `[reveals]`, `[empties d]`, `[frees 8♣: no play]`) and lists the new plays under `new_play`'s rule (`new: none (NNP)`). |
+| `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py` (what the games hold). watch.py tags each play with what it does (`[w]`, `[reveals]`, `[empties d]`, `[frees 8♣: no play]`) and lists the new plays under `new_play`'s rule (`new: none (NNP)`): freshly available since the previous position, judged by the cards (not the columns), and useful. |
 
 ## Tests
 - `npm test`: rule and lab tests (Node 18+), then the shuffle-index tests (Python).

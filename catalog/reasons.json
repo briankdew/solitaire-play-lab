@@ -72,7 +72,7 @@
     {
       "code": "new_play",
       "name": "Only new plays",
-      "definition": "No new play, so I'll draw (\"NNP\"; earlier \"NNM\", changed to be consistent with my preferred use of the word \"play\" instead of \"move\"). / The 7♦w-a is the only new play, so I'll play it (\"ONP\": only new play). / Moving a run from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
+      "definition": "A play is new only when it is \"freshly available\": the card to be played, or the card it would be played on, became available as a result of the most recent play; or the card to be played was just turned up on the waste by a stock turn (available \"again\", even if it was passed over on an earlier stock turn). A play is identified by its cards, not its columns: if the 8♦ moves to another column but stays continuously available, 7♣ onto the 8♦ is the same play and is not new again (unless the 8♦ is covered, or goes to the foundation and back, and becomes available again). For a king, the target is the empty column itself: a king-to-column play is new when the column has just been emptied or the king has just become available. After an Undo, the plays that were new when that position was first reached are new again. \"NNP\" (no new play): no new play, so I'll draw. \"ONP\" (only new play): multiple plays may be available, but the play I made was the only new play. A run moved from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-15",
@@ -90,6 +90,11 @@
         {
           "name": "Only new plays",
           "definition": "No new play, so I'll draw (\"NNP\"; earlier \"NNM\", changed to be consistent with my preferred use of the word \"play\" instead of \"move\"). / The 7♦w-a is the only new play, so I'll play it. / Moving a run from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Only new plays",
+          "definition": "No new play, so I'll draw (\"NNP\"; earlier \"NNM\", changed to be consistent with my preferred use of the word \"play\" instead of \"move\"). / The 7♦w-a is the only new play, so I'll play it (\"ONP\": only new play). / Moving a run from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
           "until": "2026-11-16"
         }
       ]

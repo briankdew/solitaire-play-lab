@@ -144,12 +144,15 @@ def _fits_on(card, target):
     return (RANKS.index(card[0]) + 1 == RANKS.index(target[0])) and ((card[1] in RED) != (target[1] in RED))
 
 
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
+
+
 def play_fact(view, key):
-    """What a play does, from the visible position only, and whether it is a "new play" under the
+    """What a play does, from the visible position only, and whether it is useful under the
     player's new_play code: a run moved from one face-up card to another is useful only when the
-    card it frees is immediately playable (home, or onto another column); a play home is always new.
-    Returns (fact, new).
-    Facts: 'w' (from the waste), 'from h' (back off home: not new), 'reveals' (turns a face-down card over),
+    card it frees is immediately playable (home, or onto another column); a play home is useful;
+    taking a card back off home is not. Returns (fact, useful).
+    Facts: 'w' (from the waste), 'from h' (back off home), 'reveals' (turns a face-down card over),
     'empties d' (leaves column d empty), 'frees 8♣: playable' / 'frees 8♣: no play'."""
     if key == "s" or not view:
         return "", False
@@ -157,22 +160,21 @@ def play_fact(view, key):
     if view.get("waste") and view["waste"][-1] == card:
         return "w", True
     if card in (view.get("home") or []):
-        return "from h", False   # taking a card back off home is never counted as a new play
+        return "from h", False
     cols = view.get("cols") or []
-    letters = "abcdefghijklmnopqrstuvwxyz"
     for i, c in enumerate(cols):
         up = c.get("up") or []
         if card not in up:
             continue
         k = up.index(card)
         if k == 0:
-            return ("reveals", True) if c.get("down") else (f"empties {letters[i]}", True)
+            return ("reveals", True) if c.get("down") else (f"empties {LETTERS[i]}", True)
         freed = up[k - 1]
         home_ok = freed[0] == "A" or any(h and h[1] == freed[1] and RANKS.index(h[0]) + 1 == RANKS.index(freed[0])
                                          for h in view.get("home") or [])
         col_ok = False
         for j, o in enumerate(cols):
-            if j == i or letters[j] == dest:
+            if j == i or LETTERS[j] == dest:
                 continue
             o_up = o.get("up") or []
             if o_up and _fits_on(freed, o_up[-1]):
@@ -180,19 +182,48 @@ def play_fact(view, key):
             elif not o_up and not o.get("down") and freed[0] == "K" and not (k - 1 == 0 and not c.get("down")):
                 col_ok = True
         ok = home_ok or col_ok
-        # The rule is about moves between columns: a play home is always new.
         return f"frees {card_text(freed)}: {'playable' if ok else 'no play'}", ok or dest == "h"
     return "", True
 
 
-def plays_facts_text(e):
-    """The plays with what each does: '8♣c [frees 9♥: no play] | 9♣e [w] | s', then the new ones."""
+def play_identity(view, key):
+    """A play named by its cards, not its columns (new_play: 7♣ onto the 8♦ is the same play wherever
+    the 8♦ sits): (card, target), the target being the card it goes on, the top card of its suit's
+    home pile ('h' plus that card, or 'h' alone for an ace), or an empty column ('empty d')."""
+    if key == "s" or not view:
+        return None
+    card, dest = key[:2], key[2:]
+    if dest == "h":
+        top = next((h for h in view.get("home") or [] if h and h[1] == card[1]), None)
+        return (card, "h" + (top or ""))
+    i = LETTERS.index(dest)
+    col = (view.get("cols") or [])[i]
+    up = col.get("up") or []
+    return (card, up[-1] if up else f"empty {dest}")
+
+
+def fresh_keys(prev, e):
+    """The plays of action event e that are freshly available (new_play): not available, by the same
+    cards, in the position before the previous action (`prev`, that action's event; None at the
+    start of the game). After an Undo, `prev` is the action before the one taken back."""
     view = e.get("view")
+    keys = [p["key"] for p in e.get("plays") or [] if p["key"] != "s"]
+    if not prev:
+        return set(keys)
+    before = {play_identity(prev.get("view"), p["key"]) for p in prev.get("plays") or [] if p["key"] != "s"}
+    return {k for k in keys if play_identity(view, k) not in before}
+
+
+def plays_facts_text(e, prev=None):
+    """The plays with what each does: '8♣c [frees 9♥: no play] | 9♣e [w] | s', then the new plays:
+    freshly available (see fresh_keys) and useful (see play_fact)."""
+    view = e.get("view")
+    fresh = fresh_keys(prev, e)
     parts, new = [], []
     for p in e.get("plays") or []:
-        fact, is_new = play_fact(view, p["key"])
+        fact, useful = play_fact(view, p["key"])
         parts.append(p["text"] + (f" [{fact}]" if fact else ""))
-        if is_new:
+        if p["key"] in fresh and useful:
             new.append(p["text"])
     return " | ".join(parts) or "(none)", " ".join(new) or "none (NNP)"
 

@@ -22,7 +22,7 @@ def secs(ms):
 
 
 def _plays(e):
-    text, new = L.plays_facts_text(e)
+    text, new = L.plays_facts_text(e, e.get("_prev"))
     return text, e.get("choices", 0), new
 
 
@@ -65,16 +65,31 @@ def describe(e):
     return f"{(t or '?').upper()} {e}"
 
 
+def track(standing, e):
+    """The actions still standing (for what was freshly available before each one): an action is
+    compared with the one before it; an Undo takes the undone action off."""
+    if e.get("type") in ("move", "turn"):
+        e["_prev"] = standing[-1] if standing else None
+        standing.append(e)
+    elif e.get("type") == "undo":
+        for i in range(len(standing) - 1, -1, -1):
+            if standing[i].get("n") == e.get("undoes"):
+                del standing[i]
+                break
+
+
 def run(game, follow):
     seen = 0
+    standing = []
     while True:
         target = L.current_game() if follow else game
         if follow and target != game:
-            game, seen = target, 0
+            game, seen, standing = target, 0, []
         if game:
             events = L.read_lines(L.game_path(game))
             for e in events[seen:]:
                 e["_game"] = game
+                track(standing, e)
                 print(describe(e), flush=True)
             seen = len(events)
         if not follow:

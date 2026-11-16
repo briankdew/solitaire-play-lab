@@ -30,5 +30,33 @@ class PlayFacts(unittest.TestCase):
         self.assertEqual(L.plays_facts_text(e), ("8♣c [frees 9♥: no play] | s", "none (NNP)"))
 
 
+class Freshness(unittest.TestCase):
+    """new_play: a play is new only when freshly available, judged by its cards, not its columns."""
+    def view(self, cols, waste=("5D", "6C", "XS"), home=("AD", None)):
+        return {"stock": 3, "waste": list(waste), "under": 0, "home": list(home),
+                "cols": [{"down": d, "up": list(u)} for d, u in cols]}
+
+    def test_a_play_still_available_by_the_same_cards_is_not_new(self):
+        before = {"view": self.view([(0, ["9D", "8S"]), (2, ["8D"]), (1, ["7C"])]),
+                  "plays": [{"key": "7Cb", "text": "7♣b"}, {"key": "s", "text": "s"}]}
+        # The 8♦ moved from b to a; 7♣ onto the 8♦ is the same play.
+        after = {"view": self.view([(0, ["9S", "8D"]), (2, ["4H"]), (1, ["7C"])]),
+                 "plays": [{"key": "7Ca", "text": "7♣a"}, {"key": "s", "text": "s"}]}
+        self.assertEqual(L.fresh_keys(before, after), set())
+        self.assertEqual(L.plays_facts_text(after, before)[1], "none (NNP)")
+
+    def test_a_newly_available_card_or_target_or_waste_card_makes_it_new(self):
+        before = {"view": self.view([(0, ["9D"]), (2, ["4H"])]), "plays": [{"key": "s", "text": "s"}]}
+        after = {"view": self.view([(0, ["9D"]), (2, ["8S"])], waste=("5D", "6C", "4S")),
+                 "plays": [{"key": "8Sa", "text": "8♠a"}, {"key": "s", "text": "s"}]}
+        self.assertEqual(L.fresh_keys(before, after), {"8Sa"})
+        self.assertEqual(L.fresh_keys(None, after), {"8Sa"})   # the first play of a game: all are new
+
+    def test_a_king_to_an_empty_column_is_named_by_the_column(self):
+        v = self.view([(0, []), (1, ["KD"])])
+        self.assertEqual(L.play_identity(v, "KDa"), ("KD", "empty a"))
+        self.assertEqual(L.play_identity(v, "2Dh"), ("2D", "hAD"))
+
+
 if __name__ == "__main__":
     unittest.main()
