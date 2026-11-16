@@ -28,7 +28,7 @@ let recording = false;
 let game = null;      // { id, ended }
 let n = 0;            // actions so far in this game (moves and turns of the stock)
 let moveNo = 0;       // numbered moves so far (as in the game record)
-let done = [];        // the actions not undone, newest last: { n, kind }
+let done = [];        // the actions not undone, newest last: { n, kind, note }
 let lastAt = 0;       // when the last action (or the deal) happened
 let question = null;  // the question showing
 let queue = Promise.resolve();
@@ -124,7 +124,8 @@ export function onAction(prev, next, token, { auto = false, retake = false } = {
   const plays = playsOf(prev);
   n += 1;
   if (kind === 'move') moveNo += 1;
-  done.push({ n, kind });
+  const entry = { n, kind };
+  done.push(entry);
   token.seq = n;   // the Game Recorder shows it beside the line
   const event = {
     type: kind,
@@ -141,6 +142,7 @@ export function onAction(prev, next, token, { auto = false, retake = false } = {
   };
   if (auto) event.auto = true;
   if (retake) event.retake = true;
+  entry.note = event.note;
   if (kind === 'turn') event.turned = token.cards;
   if (kind === 'move' && token.from !== 'w' && token.from !== 'h') {
     // A face-down card turned over by the move: now known to the player.
@@ -165,12 +167,16 @@ export function onUndo(toMark) {
   const target = toMark == null ? done.length - 1 : toMark;
   const note = takeNote();
   sinceLast();
+  let back;   // the note of the play taken back (the oldest, if several)
   while (done.length > Math.max(0, target)) {
     const last = done.pop();
     if (last.kind === 'move') moveNo -= 1;
     S.undoneSeq.push(last.n);
+    back = last.note;
     send({ type: 'undo', undoes: last.n, note: done.length === target ? note : undefined });
   }
+  // The note goes back in the box, so the play made instead picks it up (or it can be edited).
+  if (back) noteEl.value = back;
 }
 
 /** The click-again take-back: the last move (to a foundation) is replaced by a move to a column. */
@@ -180,6 +186,7 @@ export function onRetake(prev, next, token) {
     if (last.kind === 'move') moveNo -= 1;
     S.undoneSeq.push(last.n);
     send({ type: 'undo', undoes: last.n, retake: true });
+    if (last.note && !noteEl.value.trim()) noteEl.value = last.note;   // the note goes with the play made instead
   }
   onAction(prev, next, token, { retake: true });
 }
