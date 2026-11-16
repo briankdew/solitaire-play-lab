@@ -24,7 +24,11 @@ export const G = window.SixCard;
 export const AUTO_STEP_MS = 180;
 export const REFILL_LOCK_MS = 500; // after the refresh arrow, stock clicks are ignored this long (a reflex double click)
 export const DRAG_THRESHOLD = 5;
-export const SETTINGS_KEY = 'solitaire-study.settings';
+// The play lab's own memory of the settings: the solitaire-study app on the same localhost port keeps
+// its own under 'solitaire-study.settings', so the two no longer share (or overwrite) a setup.
+export const SETTINGS_KEY = 'solitaire-play-lab.settings';
+/** The play lab starts with a standard game: K473 (A–K in four suits, seven columns, draw 3). */
+export const LAB_DEFAULT_SETTINGS = { highest: 13, suits: 4, columns: 7, draw: 3 };
 // Raised whenever the rules change how a saved game deals or plays (2: row deal, suit order ♠ ♥ ♣ ♦).
 export const SAVE_RULES = 2;
 export const AUTO_FINISH_KEY = 'solitaire-study.autoFinish';

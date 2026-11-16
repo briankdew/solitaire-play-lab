@@ -1,5 +1,5 @@
 // The settings menus: High card, Suits, Columns, Draw, Custom shuffle, Card font and Auto-complete.
-import { AUTO_FINISH_KEY, CARD_FONT_KEY, G, S, SETTINGS_KEY, inPlay, rankLabel, say, setupCode, withArticle } from './shared.js';
+import { AUTO_FINISH_KEY, CARD_FONT_KEY, G, LAB_DEFAULT_SETTINGS, S, SETTINGS_KEY, inPlay, rankLabel, say, setupCode, withArticle } from './shared.js';
 import { autoFinishChk, cardFontSel, columnsSel, drawSel, highestSel, ruleLine, settingsHint, tableWrap } from './dom.js';
 import { makePicker } from './picker.js';
 import { confirmReshuffle, prepareNewShuffle, runAutoFinish } from './actions.js';
@@ -15,7 +15,7 @@ function loadSettings() {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) return G.normalizeSettings(JSON.parse(raw));
   } catch (e) { /* storage unavailable */ }
-  return G.normalizeSettings(G.DEFAULT_SETTINGS);
+  return G.normalizeSettings(LAB_DEFAULT_SETTINGS);
 }
 // Auto-complete is a preference, not a deck setting, so changing it never reshuffles.
 function loadAutoFinish() {

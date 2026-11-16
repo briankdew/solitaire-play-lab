@@ -21,6 +21,12 @@ async function openApp(page, { seed = 1 } = {}) {
   await page.addInitScript((s) => {
     let x = s >>> 0 || 1;
     Math.random = () => { x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; };
+    // The tests were written for small decks: start at 3223 unless a test has changed the settings.
+    try {
+      if (!localStorage.getItem('solitaire-play-lab.settings')) {
+        localStorage.setItem('solitaire-play-lab.settings', JSON.stringify({ highest: 3, suits: 2, columns: 2, draw: 3 }));
+      }
+    } catch { /* ignore */ }
   }, seed);
   await page.goto('/index.html');
   await expect(page.locator('.deal-btn')).toBeVisible();
