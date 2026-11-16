@@ -26,11 +26,28 @@
     },
     {
       "code": "ace_home",
-      "name": "Ace straight home",
-      "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences.",
+      "name": "Automatic home play",
+      "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed. Likewise, since 2♥ and AT LEAST 2♦ have been played to home, playing 3♠ to home (on 2♠) is automatic: there is no progressive-play reason not to play it.",
       "factors": [],
       "status": "adopted",
-      "source": "proposed in play, 2026-11-15"
+      "source": "proposed in play, 2026-11-15",
+      "history": [
+        {
+          "name": "Ace straight home",
+          "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Ace straight home",
+          "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Ace (and its 2) straight home",
+          "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed.",
+          "until": "2026-11-16"
+        }
+      ]
     },
     {
       "code": "keep_options",
@@ -75,6 +92,46 @@
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-15"
+    },
+    {
+      "code": "pass_memory",
+      "name": "Seen this pass",
+      "definition": "A card's progressive play value, judged by what I've seen in the current turn of the waste pile: e.g. playing 6♥ revealed 6♦, which I mentally note as potentially of no new progressive play value since I've not seen a black 5 in the current turn of the waste pile.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "keep_target",
+      "name": "Keep a target",
+      "definition": "Hold a card back from home when it can take a card I may want to play later: if the 3♣ becomes playable, it can be played on the 4♦. At this point in the game, the potential for a future play of 3♣ outweighs the relatively benign current move of 4♦ to home.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "home_pace",
+      "name": "Home pace by colour",
+      "definition": "As a general rule, I try not to play a card to home if it is more than two ranks higher than the lowest card of the opposite color currently played to a home pile. A suit whose ace hasn't been played counts as 0 (e.g. 0♣).",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "leftmost_target",
+      "name": "Left-most target",
+      "definition": "I consider both plays as essentially neutral unless there is a clear reason to leave one or the other open. As such, by default, a card with multiple targets is played on the left-most target card.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "hope_card",
+      "name": "Hoping for a card",
+      "definition": "In my mind, I'm hoping to reveal a particular card soon so a play can follow: e.g. a black 4 so I can reveal a card on g, especially because the stock pile is dwindling.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
     }
   ]
 }
