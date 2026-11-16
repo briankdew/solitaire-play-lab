@@ -12,7 +12,7 @@ import { placeDiagram } from './diagram.js';
 const STEP_LINE = 20, STEP_PAD = 3;
 const MOVE_STEP_H = 2 * STEP_LINE + 2 * STEP_PAD;
 const TURN_STEP_H = STEP_LINE + 2 * STEP_PAD;   // a one-line waste step: the window is this much shorter
-const settingsBelow = window.matchMedia('(max-width: 1160px)');   // the CSS breakpoints, kept in step
+const settingsBelow = window.matchMedia('(max-width: 1400px)');   // the CSS breakpoints, kept in step
 const narrowLayout = window.matchMedia('(max-width: 1000px)');
 const stackedLayout = window.matchMedia('(max-width: 440px)');
 export function layoutRecord() {

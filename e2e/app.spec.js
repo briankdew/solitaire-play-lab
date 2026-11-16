@@ -392,8 +392,8 @@ test.describe('settings', () => {
 });
 
 test.describe('layout', () => {
-  for (const [width, where] of [[1400, 'left'], [1100, 'left'], [1000, 'below'], [800, 'below'], [400, 'below']]) {
-    test(`at ${width}px the record is ${where} of the table, with no sideways scroll`, async ({ page }) => {
+  for (const [width, where] of [[1500, 'left'], [1300, 'left'], [1100, 'left'], [1000, 'below'], [800, 'below'], [400, 'below']]) {
+    test(`at ${width}px the record is ${where} of the table, nothing is cut off, and the left column shares one centerline`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await openApp(page);
       const rec = await page.locator('#record').boundingBox();
@@ -402,6 +402,14 @@ test.describe('layout', () => {
       else expect(rec.y).toBeGreaterThanOrEqual(board.y + board.height - 1);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow).toBeLessThanOrEqual(0);
+      // Think aloud, the game buttons and the record: on screen, on the same vertical centerline (exploratory too).
+      for (const explore of [false, true]) {
+        if (explore) await page.locator('#labExplore').evaluate((el) => { el.checked = true; el.dispatchEvent(new Event('change')); });
+        const boxes = await Promise.all(['#lab', '.toolbar', '#recordFrame'].map((s) => page.locator(s).boundingBox()));
+        for (const b of boxes) expect(b.x).toBeGreaterThanOrEqual(0);
+        const mids = boxes.map((b) => b.x + b.width / 2);
+        for (const m of mids) expect(Math.abs(m - mids[0])).toBeLessThan(1);
+      }
     });
   }
 });

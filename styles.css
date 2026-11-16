@@ -69,10 +69,10 @@ body {
 /* The page narrows in steps. First the settings column moves below the play area, and the play
    area moves right, so the left column (Think aloud and the record) gets all the room left over;
    Think aloud widens to fill it. */
-@media (max-width: 1160px) {   /* below this the settings column no longer fits (allowing for a scrollbar) */
+@media (max-width: 1400px) {   /* below this the three columns no longer fit beside each other (allowing for a scrollbar) */
   .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 648px); grid-template-rows: auto auto auto; }
   .side-left { grid-row: 1 / span 3; justify-self: stretch; }
-  .side-left .lab, .side-left .toolbar { width: 100%; max-width: 36rem; justify-self: end; }
+  .side-left .lab, .side-left .toolbar { width: 100%; max-width: 36rem; justify-self: center; }
   .app > .top { justify-self: end; }   /* the heading stays above the play area as it moves right */
   .side-right { grid-column: 2; grid-row: 3; max-width: none; margin-left: 0; margin-top: 14px; }
 }
@@ -123,9 +123,9 @@ body {
 .controls { display: grid; gap: 22px; width: max-content; max-width: 100%; }
 /* The game controls sit in the left column under Think aloud, as wide as it: compact buttons that
    wrap and share each row. */
-.toolbar { display: flex; flex-wrap: wrap; gap: 6px; width: 18rem; max-width: 100%; }
-.toolbar .btn { flex: 1 1 auto; font-size: 0.85rem; padding: 7px 10px; }
-#restartBtn, #newBtn { flex: 1 1 40%; }   /* the first row's two buttons, the same width */
+.toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 18rem; max-width: 100%; }   /* 2 / 2 / 1 buttons */
+.toolbar .btn { font-size: 0.85rem; padding: 7px 10px; }
+#endGameBtn { grid-column: 1 / -1; }
 .btn {
   font: 600 0.9rem/1 var(--font-ui);
   color: var(--ink);
@@ -560,8 +560,8 @@ body {
 .lab textarea:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
 /* Two-button rows: both buttons as wide as the wider one, at the right. */
 .lab-row { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; width: max-content; max-width: 100%; margin-left: auto; }
-.lab-note-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
-.lab-quick { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; flex: none; }   /* one-click notes, beside the label */
+.lab-note-head { display: grid; gap: 8px; }   /* the label on its own line, then the one-click notes */
+.lab-quick { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; justify-self: end; }   /* one-click notes, beside the label */
 .lab .btn.on { background: var(--back); border-color: var(--back); color: var(--card); }
 .lab-question {
   display: grid; gap: 6px; padding: 10px; border-radius: 8px;
@@ -575,7 +575,7 @@ body {
 .lab-explore { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; cursor: pointer; }
 .lab-explore input { margin: 2px 0 0; accent-color: var(--brass); width: 16px; height: 16px; flex: none; }
 .lab-explore small { display: block; font-size: 0.75rem; color: var(--ink-muted); }
-.lab.exploring { padding: 10px; margin-inline: -11px; border: 1px dashed var(--brass); border-radius: 10px; background: color-mix(in srgb, var(--brass) 8%, transparent); }
+.lab.exploring { box-sizing: content-box; padding: 10px; margin-inline: -11px; border: 1px dashed var(--brass); border-radius: 10px; background: color-mix(in srgb, var(--brass) 8%, transparent); }
 .lab.exploring .lab-explore span { color: var(--brass); font-weight: 600; }
 .lab-shuffle { margin: 0; font-size: 0.8rem; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
 .lab-shuffle b { font-weight: 600; color: var(--ink); letter-spacing: 0.02em; }
