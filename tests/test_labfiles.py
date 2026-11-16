@@ -15,7 +15,9 @@ class PlayFacts(unittest.TestCase):
     def test_waste_reveal_empty(self):
         self.assertEqual(L.play_fact(VIEW, "4Sf"), ("w", True))
         self.assertEqual(L.play_fact(VIEW, "4Db"), ("reveals", True))
-        self.assertEqual(L.play_fact(VIEW, "8De"), ("empties d", True))
+        self.assertEqual(L.play_fact(VIEW, "8De"), ("empties d: no king", False))   # keep_options: no king ready
+        with_king = dict(VIEW, waste=["5D", "6C", "KH"])
+        self.assertEqual(L.play_fact(with_king, "8De"), ("empties d", True))
         self.assertEqual(L.play_fact(VIEW, "s"), ("", False))
 
     def test_a_run_moved_between_matching_cards_is_new_only_if_the_freed_card_can_play(self):

@@ -155,7 +155,7 @@ def play_fact(view, key):
     card it frees is immediately playable (home, or onto another column); a play home is useful;
     taking a card back off home is not. Returns (fact, useful).
     Facts: 'w' (from the waste), 'from h' (back off home), 'reveals' (turns a face-down card over),
-    'empties d' (leaves column d empty), 'frees 8♣: playable' / 'frees 8♣: no play'."""
+    'empties d' (leaves column d empty; useful only with a king ready: 'empties d: no king'), 'frees 8♣: playable' / 'frees 8♣: no play'."""
     if key == "s" or not view:
         return "", False
     card, dest = key[:2], key[2:]
@@ -170,7 +170,10 @@ def play_fact(view, key):
             continue
         k = up.index(card)
         if k == 0:
-            return ("reveals", True) if c.get("down") else (f"empties {LETTERS[i]}", True)
+            if c.get("down"):
+                return "reveals", True
+            # keep_options: emptying a column is worth it only with a king ready to fill it.
+            return (f"empties {LETTERS[i]}", True) if king_ready(view, i) else (f"empties {LETTERS[i]}: no king", False)
         freed = up[k - 1]
         home_ok = freed[0] == "A" or any(h and h[1] == freed[1] and RANKS.index(h[0]) + 1 == RANKS.index(freed[0])
                                          for h in view.get("home") or [])
@@ -186,6 +189,18 @@ def play_fact(view, key):
         ok = home_ok or col_ok
         return f"frees {card_text(freed)}: {'playable' if ok else 'no play'}", ok or dest == "h"
     return "", True
+
+
+def king_ready(view, skip=None):
+    """A king that could move into an emptied column: the top waste card, or a king in a column with
+    cards under it (face-down, or face-up below it). Column `skip` is the one being emptied."""
+    if (view.get("waste") or [""])[-1][:1] == "K":
+        return True
+    for j, c in enumerate(view.get("cols") or []):
+        up = c.get("up") or []
+        if j != skip and any(x[0] == "K" and (k > 0 or c.get("down")) for k, x in enumerate(up)):
+            return True
+    return False
 
 
 def play_identity(view, key):
