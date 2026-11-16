@@ -28,7 +28,7 @@ function stepsOf(tokens, undone = []) {
     }
   };
   let i = G.dealLength(tokens);
-  if (i) steps.push({ key: tokens[0], kind: 'deal', tokens: tokens.slice(0, i) });
+  if (i) steps.push({ key: tokens[0], kind: 'deal', tokens: tokens.slice(0, i), seq: 0 });
   let n = 0;
   for (; i < tokens.length; i++) {
     const t = tokens[i];
@@ -60,7 +60,7 @@ const fanOf = (t) => t.fan || (t.type === 'turn' ? t.cards : t.top ? [t.top] : [
 function stepEl(step) {
   const el = document.createElement('div');
   el.className = 'step';
-  // The sequence number, in a gray column down the step's left side (blank for the deal and EOP).
+  // The sequence number, in a gray column down the step's left side (000 for the deal, blank for EOP).
   let html = `<span class="seq">${step.seq != null ? String(step.seq).padStart(3, '0') : ''}</span>`;
   if (step.kind === 'deal') {
     html += '<span class="lbl">D</span>' + step.tokens.map((t, i) =>

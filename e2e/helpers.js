@@ -45,7 +45,7 @@ const foundation = (page, i) => page.locator('.slot.foundation').nth(i);
 const recordText = (page) => page.locator('#steps .step:not(.undone)').evaluateAll((steps) => steps
   .flatMap((st) => [...st.children].filter((c) => !c.classList.contains('seq')).map((c) => c.innerText))
   .join(' ').split(/\s+/).join(' ').trim());
-/** Each step's sequence number ('' for the deal) and whether it is a neutral (undone) line. */
+/** Each step's sequence number ('000' for the deal) and whether it is a neutral (undone) line. */
 const seqLines = (page) => page.locator('#steps .step').evaluateAll((els) =>
   els.map((el) => `${el.querySelector('.seq').textContent}${el.classList.contains('undone') ? ' undone' : ''}`));
 const status = (page) => page.locator('#status');

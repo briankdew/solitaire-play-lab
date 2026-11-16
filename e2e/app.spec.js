@@ -113,13 +113,13 @@ test.describe('play', () => {
     await pickShuffle(page, 1);
     await deal(page);
     await card(page, 'AS').click();
-    await expect.poll(() => seqLines(page)).toEqual(['', '001']);
+    await expect.poll(() => seqLines(page)).toEqual(['000', '001']);
     await page.locator('#undoBtn').click();
-    await expect.poll(() => seqLines(page)).toEqual(['', '001 undone']);
+    await expect.poll(() => seqLines(page)).toEqual(['000', '001 undone']);
     await expect(page.locator('#steps .step.undone .cards')).toHaveText('--');
     await expect(page.locator('#steps .step.undone .pile')).toHaveText('-');
     await card(page, 'AS').click();
-    await expect.poll(() => seqLines(page)).toEqual(['', '001 undone', '002']);
+    await expect.poll(() => seqLines(page)).toEqual(['000', '001 undone', '002']);
     await expect.poll(() => recordText(page)).toBe('D A♠ a A♥ b 2♥ w 1 A♠ h -- a');
   });
 
