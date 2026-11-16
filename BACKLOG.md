@@ -4,6 +4,7 @@ Items raised for later. The player decides when each is taken up; each starts wi
 
 ## Next
 - **Restart the Play Lab server after the current game** (Ctrl+C, then `playlab`) so the reason-code menu lists every code: the running server predates `/api/codes`.
+- **Suit buttons in the player's order** ♠ ♥ ♣ ♦ (now ♠ ♥ ♦ ♣), below both the note and answer boxes. After the current game. (Raised 2026-11-16.)
 - **Pause game:** stop a game on purpose and pick it up later, from a new **Paused games** tab in Played shuffle. To settle: is time away left out of think time; can several games be paused at once; what happens to a paused game if the same shuffle is replayed fresh. (Raised 2026-11-16.)
 
 ## Later

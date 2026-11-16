@@ -40,6 +40,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 ## Notation (from the player's game)
 - **Plays and draws:** a draw (a turn of the stock, `s`) is not a play. It is a neutral action needed for play to continue. (Some tools still list `s` among the "plays"; see `BACKLOG.md`.)
 - **Piles:** `s` stock, `w` waste, `h` home (foundations), `a b c …` columns.
+- **Suit order:** ♠ ♥ ♣ ♦, the player's standard, unless there's good reason to do otherwise.
 - **Cards:** rank then suit, X for ten (`XC`). Symbols on screen (`A♠`), letters in the official record (`AS`).
 - **Play keys:** card + destination: `ASh`, `4Ha`, shown as `A♠h`, `4♥a`. `s` is a turn of the stock; with the stock empty, it turns the waste back over first.
 - **Official record tokens** come from game.js: `ASh--a` is a move (card, destination, then the new top of the source and its letter); `4S2Hw` is a turn; `W9` / `L12` is the result.

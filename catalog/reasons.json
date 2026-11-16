@@ -34,7 +34,7 @@
       "name": "Automatic home play",
       "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed. Likewise, since 2♥ and AT LEAST 2♦ have been played to home, playing 3♠ to home (on 2♠) is automatic: there is no progressive-play reason not to play it.",
       "factors": [],
-      "status": "adopted",
+      "status": "retired",
       "source": "proposed in play, 2026-11-15",
       "history": [
         {
@@ -52,7 +52,8 @@
           "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed.",
           "until": "2026-11-16"
         }
-      ]
+      ],
+      "retired": "2026-11-16: broadened and renamed direct_home"
     },
     {
       "code": "keep_options",
@@ -265,6 +266,37 @@
       "factors": [],
       "status": "adopted",
       "source": "split from new_play, 2026-11-16"
+    },
+    {
+      "code": "direct_home",
+      "name": "Direct home",
+      "definition": "A card plays directly to the home pile whenever there is no advantage in not playing it, and NOT playing it could lead to a disadvantage (regressive play): e.g. with A♠, 2♥, A♣ and 2♦ home, I expect 2♠, 3♥, 2♣ and 3♦ to play directly home. An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed. Likewise, since 2♥ and AT LEAST 2♦ have been played to home, playing 3♠ to home (on 2♠) is automatic: there is no progressive-play reason not to play it.",
+      "factors": [],
+      "status": "adopted",
+      "source": "broadened from ace_home, 2026-11-16",
+      "history": [
+        {
+          "name": "Ace straight home",
+          "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Ace straight home",
+          "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Ace (and its 2) straight home",
+          "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Automatic home play",
+          "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed. Likewise, since 2♥ and AT LEAST 2♦ have been played to home, playing 3♠ to home (on 2♠) is automatic: there is no progressive-play reason not to play it.",
+          "until": "2026-11-16",
+          "code": "ace_home"
+        }
+      ]
     }
   ]
 }
