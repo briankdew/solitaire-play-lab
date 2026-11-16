@@ -1,4 +1,68 @@
 {
   "about": "The vocabulary of reasons for choosing a play, built from the player's own words during play. Claude tags each explained play with these codes (catalog/annotations.jsonl). A new code starts as 'proposed' and becomes 'adopted' only when the player agrees; its definition uses the player's words.",
-  "reasons": []
+  "reasons": [
+    {
+      "code": "most_hidden",
+      "name": "Uncover the most hidden",
+      "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards. The overarching strategy is to uncover the card on the columns that has the most potential to reveal more cards to be played.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-15",
+      "history": [
+        {
+          "name": "Uncover the most hidden",
+          "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards.",
+          "until": "2026-11-16"
+        }
+      ]
+    },
+    {
+      "code": "rightmost_first",
+      "name": "Right-most playable first",
+      "definition": "At the beginning of the game, I do this by selecting the right-most card that is playable.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-15"
+    },
+    {
+      "code": "ace_home",
+      "name": "Ace straight home",
+      "definition": "An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-15"
+    },
+    {
+      "code": "keep_options",
+      "name": "Keep options open",
+      "definition": "I don't want to make that decision prematurely. Not playing either of them until I have a king to put in the columns is an unnecessary decision that locks me into a position before I know what's coming next. Leaving them in place leaves my options open.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-15"
+    },
+    {
+      "code": "new_play",
+      "name": "Only new plays",
+      "definition": "No new play, so I'll draw. / The 7♦w-a is the only new play, so I'll play it.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-15"
+    },
+    {
+      "code": "longest_run",
+      "name": "Build the longer run",
+      "definition": "When there is nothing else to consider, I play the 9 with the most run-cards on it. There may be no advantage in doing so, but I opt for continuing to build an existing longer run over starting or adding to a smaller one (all other things being equal).",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-15"
+    },
+    {
+      "code": "king_column",
+      "name": "King to an empty column",
+      "definition": "Because my goal is to not use memory/card-counting, playing a king is an automatic play, similar to the reason for always playing an ace on its home pile.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-15"
+    }
+  ]
 }

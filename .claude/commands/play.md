@@ -15,7 +15,7 @@ The player is about to play (or is playing) in the browser with `./play` running
    - **No note, but the question rules say to ask:** run `python3 tools/ask.py --n N --play "A♥h" "Short question?"`. The question appears in the game's panel. Ask only when no other question is open.
    - **No note and no question needed:** add nothing now. `/review` covers it.
 5. **ANSWER** (or the player answers in the terminal): record a terminal answer with `python3 tools/ask.py --answer "..."`. Then annotate that action with `--source answer`.
-6. **A reason no code covers:** suggest a code in one line ("New: `surface_soon`, Surface soon: … OK?"). On a yes, run `tools/annotate.py --propose ...` and then `--adopt`, and use it.
+6. **A reason no code covers:** suggest a code in one line ("New: `surface_soon`, Surface soon: … OK?"). On a yes, run `tools/annotate.py --propose ...` and then `--adopt`, and use it. If the words refine an existing code instead, update it (`--update CODE --definition "..."`) and mention it in one line.
 7. **Keep the terminal quiet:** at most one short line per event you act on. In method games, never comment on the quality of a play or suggest a play. Never mention what a hidden card might be.
 8. **On END:**
    - Give a 2–3 line tally: actions, decisions, notes, and questions asked and answered.

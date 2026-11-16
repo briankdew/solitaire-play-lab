@@ -6,6 +6,7 @@
     python3 tools/annotate.py --propose surface_soon --name "Surface soon" \
         --definition "..."            # a new reason code, 'proposed' until the player agrees
     python3 tools/annotate.py --adopt surface_soon   # the player agreed
+    python3 tools/annotate.py --update surface_soon --definition "..."   # refine a code (old wording kept)
     python3 tools/annotate.py --list                 # the codes
 
 --source says where the reason came from: note (the player's note), answer (an answer to a
@@ -38,6 +39,7 @@ def main():
     p.add_argument("--definition")
     p.add_argument("--factors", default="", help="lab/features.js factors it matches, comma-separated")
     p.add_argument("--adopt", metavar="CODE")
+    p.add_argument("--update", metavar="CODE", help="refine a code's --definition and/or --name")
     p.add_argument("--list", action="store_true")
     a = p.parse_args()
     data = load_reasons()
@@ -65,9 +67,21 @@ def main():
         L.write_json(L.REASONS, data)
         print(f"Adopted {a.adopt}.")
         return
+    if a.update:
+        if a.update not in codes:
+            sys.exit(f"No code {a.update}.")
+        if not (a.name or a.definition):
+            sys.exit("--update needs --definition and/or --name")
+        r = codes[a.update]
+        r.setdefault("history", []).append({"name": r["name"], "definition": r["definition"], "until": L.now()[:10]})
+        r["name"] = a.name or r["name"]
+        r["definition"] = a.definition or r["definition"]
+        L.write_json(L.REASONS, data)
+        print(f"Updated {a.update}.")
+        return
 
     if a.n is None or not a.codes:
-        p.error("give --n and --codes (or --propose / --adopt / --list)")
+        p.error("give --n and --codes (or --propose / --adopt / --update / --list)")
     wanted = [c.strip() for c in a.codes.split(",") if c.strip()]
     unknown = [c for c in wanted if c not in codes]
     if unknown:
