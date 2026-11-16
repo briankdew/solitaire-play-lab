@@ -43,10 +43,22 @@
     {
       "code": "new_play",
       "name": "Only new plays",
-      "definition": "No new play, so I'll draw. / The 7♦w-a is the only new play, so I'll play it.",
+      "definition": "No new play, so I'll draw (\"NNP\"; earlier \"NNM\", changed to be consistent with my preferred use of the word \"play\" instead of \"move\"). / The 7♦w-a is the only new play, so I'll play it. / Moving a run from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
       "factors": [],
       "status": "adopted",
-      "source": "proposed in play, 2026-11-15"
+      "source": "proposed in play, 2026-11-15",
+      "history": [
+        {
+          "name": "Only new plays",
+          "definition": "No new play, so I'll draw. / The 7♦w-a is the only new play, so I'll play it.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Only new plays",
+          "definition": "No new play, so I'll draw. / The 7♦w-a is the only new play, so I'll play it. / Moving a run from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
+          "until": "2026-11-16"
+        }
+      ]
     },
     {
       "code": "longest_run",

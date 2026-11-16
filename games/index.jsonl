@@ -1,0 +1,4 @@
+{"type": "shuffle", "id": "K473-000001-43b87ec0d1d7", "setup": "K473", "n": 1, "fingerprint": "43b87ec0d1d7", "mirror": "c07eb87478cc", "deck": ["9H", "2C", "9D", "8D", "JH", "JD", "8H", "4D", "AD", "QS", "KS", "2S", "3C", "8C", "3D", "7C", "AH", "5C", "2H", "XH", "2D", "AS", "3S", "QC", "QH", "XC", "6D", "6S", "KH", "3H", "XS", "4C", "JC", "XD", "5S", "7S", "7D", "9C", "QD", "JS", "KC", "5H", "4H", "6H", "7H", "KD", "AC", "9S", "4S", "5D", "6C", "8S"], "t": "2026-11-15T09:24:08-05:00"}
+{"type": "deal", "game": "K473-20261115-092408-b26b", "shuffle": "K473-000001-43b87ec0d1d7", "exploratory": true, "t": "2026-11-15T09:24:08-05:00"}
+{"type": "mark", "game": "K473-20261115-092408-b26b", "exploratory": false, "t": "2026-11-15T09:25:14-05:00"}
+{"type": "end", "game": "K473-20261115-092408-b26b", "result": "L", "moves": 17, "t": "2026-11-16T08:48:28-05:00"}

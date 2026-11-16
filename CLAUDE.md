@@ -30,6 +30,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
   - a note uses a term that isn't in `catalog/reasons.json`,
   - two notes contradict each other.
 - **Don't ask when:** only one play was possible, or the note already explains the play.
+- **Draws with no note:** when there was no new play (see `new_play`: moving a run is a useful play only if the card it frees is immediately playable), assume NNP: code it `new_play` (`--source inferred`) and don't ask. If a new play appears to have been missed, say so in one line (the player asked for this; visible cards only).
 - **One question at a time, under 15 words,** about one action (`--n`). Plain words, the player's notation (`A♠h`, `4♥a`, `s`).
 - If the player is moving fast, skip questions and catch up in `/review`.
 - **New terms:** when the player describes something no code covers, suggest a short code, name and definition in one line (`tools/annotate.py --propose`). Adopt it only after the player agrees (`--adopt`). The player's own words go in the definition.
