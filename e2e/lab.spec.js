@@ -84,6 +84,23 @@ test.describe('think aloud', () => {
     expect(events.find((e) => e.type === 'move')).toMatchObject({ key: 'ASh', note: 'only play' });
   });
 
+  test('a note typed before Undo stays in the box and goes with the next play', async ({ page }) => {
+    await openApp(page);
+    await pickShuffle(page, SCREENSHOT_DEAL);
+    await deal(page);
+    await stock(page).click();
+    await settle(page);
+    await page.locator('#labNote').fill('Open column a to make room');
+    await page.locator('#undoBtn').click();
+    await settle(page);
+    await expect(page.locator('#labNote')).toHaveValue('Open column a to make room');
+    await card(page, 'AS').click();
+    await settle(page);
+    const events = await eventsOf(page, 4);
+    expect(events.find((e) => e.type === 'undo').note).toBeUndefined();
+    expect(events.find((e) => e.type === 'move')).toMatchObject({ key: 'ASh', note: 'Open column a to make room' });
+  });
+
   test('undo, a turn of the stock, a reveal and a win are recorded, and the log replays to the win', async ({ page }) => {
     await openApp(page);
     await pickShuffle(page, SCREENSHOT_DEAL);

@@ -166,7 +166,6 @@ export function mark() {
 export function onUndo(toMark) {
   if (game) game.ended = false;   // only a win can be undone (End game and Forfeit can't)
   const target = toMark == null ? done.length - 1 : toMark;
-  const note = takeNote();
   sinceLast();
   let back;   // the note of the play taken back (the oldest, if several)
   while (done.length > Math.max(0, target)) {
@@ -174,10 +173,11 @@ export function onUndo(toMark) {
     if (last.kind === 'move') moveNo -= 1;
     S.undoneSeq.push(last.n);
     back = last.note;
-    send({ type: 'undo', undoes: last.n, note: done.length === target ? note : undefined });
+    send({ type: 'undo', undoes: last.n });
   }
-  // The note goes back in the box, so the play made instead picks it up (or it can be edited).
-  if (back) noteEl.value = back;
+  // A note being typed stays in the box for the play made instead; with none, the undone play's
+  // note goes back in the box so that play picks it up (or it can be edited).
+  if (back && !noteEl.value.trim()) noteEl.value = back;
 }
 
 /** The click-again take-back: the last move (to a foundation) is replaced by a move to a column. */
