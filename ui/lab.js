@@ -21,6 +21,8 @@ const answerMic = el('labAnswerMic');
 const answerSend = el('labAnswerSend');
 const shuffleEl = el('labShuffle');
 const exploreChk = el('labExplore');
+const codeSel = el('labCode');
+const codeDefEl = el('labCodeDef');
 const EXPLORE_KEY = 'solitaire-play-lab.exploratory';
 
 const QUESTION_POLL_MS = 2500;
@@ -62,6 +64,7 @@ function showShuffle(reply) {
 function takeNote() {
   const text = noteEl.value.trim();
   noteEl.value = '';
+  codeDefEl.hidden = true;
   return text || undefined;
 }
 
@@ -111,6 +114,8 @@ export function onDeal(state, deck) {
     note: takeNote(),
   }, showShuffle);
   shuffleEl.hidden = true;
+  codeDefEl.hidden = true;
+  loadCodes();
   showStatus();
 }
 
@@ -224,6 +229,62 @@ function onExploreChange() {
   if (game && !game.ended) send({ type: 'mark', exploratory: exploreChk.checked, after: done.length ? done[done.length - 1].n : 0 });
 }
 
+/* ---------- reason codes ---------- */
+
+/** Put text into a box at its cursor (or the end), with a space on either side where needed. */
+export function insertAt(box, text, spaced = true) {
+  const v = box.value;
+  const a = box.selectionStart ?? v.length;
+  const b = box.selectionEnd ?? v.length;
+  const before = spaced && a > 0 && !/\s/.test(v[a - 1]) ? ' ' : '';
+  const after = spaced && b < v.length && !/\s/.test(v[b]) ? ' ' : '';
+  box.value = v.slice(0, a) + before + text + after + v.slice(b);
+  const at = a + before.length + text.length;
+  box.setSelectionRange(at, at);
+}
+
+// The menu: NNP and ONP first, then the adopted codes from catalog/reasons.json, most used first
+// (refreshed at each deal). Hovering an entry shows its definition; picking one shows it below.
+const SHORTHAND = [
+  { code: 'NNP', name: 'no new play', definition: 'No new play, so I draw (new_play).' },
+  { code: 'ONP', name: 'only new play', definition: 'Several plays may be available, but the play I made was the only new play (new_play).' },
+];
+let codeDefs = {};
+function codeOption(c, label) {
+  const o = document.createElement('option');
+  o.value = c.code;
+  o.textContent = label;
+  o.title = c.definition;
+  return o;
+}
+async function loadCodes() {
+  let items = [];
+  try {
+    const r = await fetch('/api/codes', { cache: 'no-store' });
+    if (r.ok) items = (await r.json()).items || [];
+  } catch { /* no server: shorthand only */ }
+  codeDefs = {};
+  const head = codeSel.options[0];
+  codeSel.replaceChildren(head);
+  for (const c of SHORTHAND) { codeDefs[c.code] = c; codeSel.append(codeOption(c, `${c.code} · ${c.name}`)); }
+  if (items.length) {
+    const g = document.createElement('optgroup');
+    g.label = 'Codes, most used first';
+    for (const c of items) { codeDefs[c.code] = c; g.append(codeOption(c, `${c.code} · ${c.name}`)); }
+    codeSel.append(g);
+  }
+  codeSel.value = '';
+}
+function pickCode() {
+  const c = codeDefs[codeSel.value];
+  codeSel.value = '';
+  if (!c) return;
+  insertAt(noteEl, c.code);
+  codeDefEl.textContent = `${c.code}: ${c.definition}`;
+  codeDefEl.hidden = false;
+  noteEl.focus();
+}
+
 /* ---------- notes and answers ---------- */
 
 function sendNoteNow() {
@@ -231,7 +292,7 @@ function sendNoteNow() {
   if (!text) return;
   send({ type: 'note', after: done.length ? done[done.length - 1].n : 0, text });
   noteSend.textContent = 'Added';
-  setTimeout(() => { noteSend.textContent = 'Add note now'; }, 1200);
+  setTimeout(() => { noteSend.textContent = 'Add now'; }, 1200);
 }
 
 async function sendAnswer() {
@@ -324,12 +385,16 @@ async function start() {
   speech(noteMic, noteEl);
   speech(answerMic, answerEl);
   noteSend.addEventListener('click', sendNoteNow);
-  // One-click notes: the text goes in the box (after anything typed), and with the next play.
-  for (const b of el('labQuick').querySelectorAll('button')) {
-    b.addEventListener('click', () => {
-      const typed = noteEl.value.trim();
-      noteEl.value = typed ? `${typed} ${b.dataset.note}` : b.dataset.note;
-    });
+  codeSel.addEventListener('change', pickCode);
+  loadCodes();
+  // Suit buttons: add the suit at the cursor of their box. Pressing one doesn't take the focus
+  // (or the cursor) away from the box.
+  for (const group of document.querySelectorAll('.lab-suits')) {
+    const box = el(group.dataset.for);
+    for (const b of group.querySelectorAll('button')) {
+      b.addEventListener('mousedown', (e) => e.preventDefault());
+      b.addEventListener('click', () => { insertAt(box, b.dataset.suit, false); box.focus(); });
+    }
   }
   answerSend.addEventListener('click', sendAnswer);
   for (const box of [noteEl, answerEl]) {

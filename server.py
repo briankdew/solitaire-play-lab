@@ -53,6 +53,46 @@ def use_data_dir(data):
         shuffles.rebuild(GAMES)
     INDEX = shuffles.Index(index_path)
 
+def read_lines(path):
+    out = []
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        out.append(json.loads(line))
+                    except ValueError:
+                        pass
+    except FileNotFoundError:
+        pass
+    return out
+
+
+def codes_list():
+    """The adopted reason codes for the note menu, most used first: uses are coded plays in method games
+    (not exploratory, not undone) whose game log is here. Never-used codes follow, by name."""
+    reasons = read_json(os.path.join(CATALOG, "reasons.json"), {}).get("reasons", [])
+    undone = {}
+    def is_undone(game, n):
+        if game not in undone:
+            undone[game] = {e.get("undoes") for e in read_lines(os.path.join(GAMES, game + ".jsonl")) if e.get("type") == "undo"}
+        return n in undone[game]
+    counts = {}
+    for a in read_lines(os.path.join(CATALOG, "annotations.jsonl")):
+        game = a.get("game") or ""
+        if a.get("exploratory") or not GAME_ID.match(game) or not os.path.exists(os.path.join(GAMES, game + ".jsonl")):
+            continue
+        if is_undone(game, a.get("n")):
+            continue
+        for c in a.get("codes", []):
+            counts[c] = counts.get(c, 0) + 1
+    items = [{"code": r["code"], "name": r.get("name", ""), "definition": r.get("definition", ""), "uses": counts.get(r["code"], 0)}
+             for r in reasons if r.get("status") == "adopted"]
+    items.sort(key=lambda r: (-r["uses"], r["code"]))
+    return {"items": items}
+
+
 GAME_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$")
 MAX_BODY = 1_000_000
 lock = threading.Lock()
@@ -151,6 +191,9 @@ class Handler(SimpleHTTPRequestHandler):
         if path == "/api/deleted":
             with lock:
                 return self.send_json(deleted_list())
+        if path == "/api/codes":
+            with lock:
+                return self.send_json(codes_list())
         if path == "/api/status":
             return self.send_json({"recording": True})
         if path == "/api/question":

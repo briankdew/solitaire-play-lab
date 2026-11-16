@@ -559,9 +559,26 @@ body {
 .lab textarea::placeholder { color: var(--ink-muted); }
 .lab textarea:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
 /* Two-button rows: both buttons as wide as the wider one, at the right. */
-.lab-row { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; width: max-content; max-width: 100%; margin-left: auto; }
+.lab-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lab-pair { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; margin-left: auto; }
+/* Suit buttons: small card-white chips, red or black like the cards. */
+.lab-suits { display: flex; gap: 3px; }
+.lab-suits button {
+  width: 24px; height: 24px; padding: 0; border: 0; border-radius: 4px; cursor: pointer;
+  font: 15px/24px var(--font-ui); color: var(--black); background: var(--card);
+}
+.lab-suits button.r { color: var(--red); }
+.lab-suits button:hover { filter: brightness(0.92); }
+.lab-suits button:focus-visible { outline: 3px solid var(--brass); outline-offset: 1px; }
 .lab-note-head { display: grid; gap: 8px; }   /* the label on its own line, then the one-click notes */
-.lab-quick { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; justify-self: end; }   /* one-click notes, beside the label */
+.lab select#labCode {   /* the reason-code menu, under the label */
+  width: 100%; font: 0.85rem var(--font-ui); color: var(--ink);
+  background: color-mix(in srgb, var(--felt-deep) 70%, transparent);
+  border: 1px solid var(--slot); border-radius: 6px; padding: 5px 6px;
+}
+.lab select#labCode option, .lab select#labCode optgroup { color: #1d1d1d; background: #ffffff; }
+.lab select#labCode:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
+.lab-code-def { margin: 0; font-size: 0.75rem; color: var(--ink-muted); }   /* the picked code's definition */   /* one-click notes, beside the label */
 .lab .btn.on { background: var(--back); border-color: var(--back); color: var(--card); }
 .lab-question {
   display: grid; gap: 6px; padding: 10px; border-radius: 8px;

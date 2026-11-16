@@ -50,21 +50,42 @@ test.describe('think aloud', () => {
     expect(first.view).toEqual({ stock: 2, waste: ['3S', 'AH', '2S'], under: 0, cols: [{ down: 0, up: ['AS'] }, { down: 1, up: ['4H'] }], home: [null, null] });
   });
 
-  test('the one-click notes fill the note box, and the note goes with the next play', async ({ page }) => {
+  test('the reason-code menu adds a code at the cursor and shows its definition; the note goes with the next play', async ({ page }) => {
     await openApp(page);
     await pickShuffle(page, SCREENSHOT_DEAL);
     await deal(page);
-    await page.locator('#labQuick button', { hasText: 'Only play' }).click();
-    await expect(page.locator('#labNote')).toHaveValue('Only play');
+    const menu = page.locator('#labCode');
+    await expect(menu.locator('option[value="new_play"]')).toHaveCount(1);   // the adopted codes, from catalog/reasons.json
+    expect(await menu.locator('option[value="new_play"]').getAttribute('title')).toMatch(/freshly available/);   // hover shows the definition
+    await menu.selectOption('ONP');
+    await expect(page.locator('#labNote')).toHaveValue('ONP');
+    await expect(page.locator('#labCodeDef')).toContainText('ONP: ');
+    await expect(menu).toHaveValue('');
     await stock(page).click();
     await settle(page);
-    await page.locator('#labNote').fill('Nothing new:');
-    await page.locator('#labQuick button', { hasText: 'NNP' }).click();
-    await expect(page.locator('#labNote')).toHaveValue('Nothing new: NNP');
+    await expect(page.locator('#labCodeDef')).toBeHidden();
+    await page.locator('#labNote').fill('nothing new');
+    await page.locator('#labNote').evaluate((t) => t.setSelectionRange(0, 0));
+    await menu.selectOption('NNP');
+    await expect(page.locator('#labNote')).toHaveValue('NNP nothing new');   // at the cursor, with a space
     await stock(page).click();
     await settle(page);
     const turns = (await eventsOf(page, 3)).filter((e) => e.type === 'turn');
-    expect(turns.map((e) => e.note)).toEqual(['Only play', 'Nothing new: NNP']);
+    expect(turns.map((e) => e.note)).toEqual(['ONP', 'NNP nothing new']);
+  });
+
+  test('the suit buttons put a suit at the cursor of their box, which keeps the focus', async ({ page }) => {
+    await openApp(page);
+    await pickShuffle(page, SCREENSHOT_DEAL);
+    await deal(page);
+    const note = page.locator('#labNote');
+    await note.fill('Ah first');
+    await note.evaluate((t) => t.setSelectionRange(1, 1));
+    await page.locator('.lab-suits[data-for="labNote"] button[data-suit="♦"]').click();
+    await expect(note).toHaveValue('A♦h first');
+    await expect(note).toBeFocused();
+    await page.locator('.lab-suits[data-for="labNote"] button[data-suit="♠"]').click();
+    await expect(note).toHaveValue('A♦♠h first');   // still at the cursor, after the first suit
   });
 
   test('Undo puts the undone play\'s note back in the note box, for the play made instead', async ({ page }) => {
