@@ -34,7 +34,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 - **One question at a time, under 15 words,** about one action (`--n`). Plain words, the player's notation (`A♠h`, `4♥a`, `s`).
 - If the player is moving fast, skip questions and catch up in `/review`.
 - **New terms:** when the player describes something no code covers, suggest a short code, name and definition in one line (`tools/annotate.py --propose`). Adopt it only after the player agrees (`--adopt`). The player's own words go in the definition.
-- **Refining codes:** when the player's words extend, sharpen or qualify an existing code, update that code instead of creating a new one (`tools/annotate.py --update CODE --definition "..."`; the old wording is kept in its `history`). Use the player's words and say so in one line. Propose a new code only when the reason is genuinely different.
+- **Refining codes:** when the player's words extend, sharpen or qualify an existing code, update that code instead of creating a new one (`tools/annotate.py --update CODE --definition "..."`; the old wording is kept in its `history`). Use the player's words and say so in one line. Propose a new code only when the reason is genuinely different. The player may restate an existing code in new words without realizing it (or without finding it in the menu): code such a play with the existing code, refining it if the new words add something, rather than proposing a near-duplicate.
 
 ## Notation (from the player's game)
 - **Piles:** `s` stock, `w` waste, `h` home (foundations), `a b c …` columns.
