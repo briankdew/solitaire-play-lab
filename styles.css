@@ -552,7 +552,7 @@ body {
 .lab-label { font-size: 0.85rem; color: var(--ink); }
 .lab-label span { display: block; font-size: 0.75rem; color: var(--ink-muted); }
 .lab textarea {
-  width: 100%; resize: vertical; font: 0.95rem/1.4 var(--font-ui); color: var(--ink);
+  width: 100%; resize: vertical; font: 0.85rem/1.4 var(--font-ui); color: var(--ink);   /* the size of "Why this play?" */
   background: color-mix(in srgb, var(--felt-deep) 70%, transparent);
   border: 1px solid var(--slot); border-radius: 6px; padding: 6px 8px;
 }
