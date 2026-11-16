@@ -41,8 +41,13 @@ async function deal(page) {
 }
 const card = (page, id) => page.locator(`.card[data-id="${id}"]`);
 const foundation = (page, i) => page.locator('.slot.foundation').nth(i);
-/** The Game Record panel as one line of text. */
-const recordText = async (page) => (await page.locator('#steps').innerText()).split(/\s+/).join(' ').trim();
+// The record's lines, without the play lab's sequence column and its neutral lines for undone actions.
+const recordText = (page) => page.locator('#steps .step:not(.undone)').evaluateAll((steps) => steps
+  .flatMap((st) => [...st.children].filter((c) => !c.classList.contains('seq')).map((c) => c.innerText))
+  .join(' ').split(/\s+/).join(' ').trim());
+/** Each step's sequence number ('' for the deal) and whether it is a neutral (undone) line. */
+const seqLines = (page) => page.locator('#steps .step').evaluateAll((els) =>
+  els.map((el) => `${el.querySelector('.seq').textContent}${el.classList.contains('undone') ? ' undone' : ''}`));
 const status = (page) => page.locator('#status');
 
 /** Drag one element's center onto another's, in small steps like a real pointer. */
@@ -57,4 +62,4 @@ async function dragTo(page, from, to) {
   await settle(page);
 }
 
-module.exports = { test, expect, openApp, pickShuffle, deal, settle, card, foundation, recordText, status, dragTo };
+module.exports = { test, expect, openApp, pickShuffle, deal, settle, card, foundation, recordText, seqLines, status, dragTo };

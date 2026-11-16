@@ -15,18 +15,30 @@ const isRedId = (id) => id[1] === 'H' || id[1] === 'D';
 /**
  * Group the record into steps: the deal (one line per column, then its waste turn),
  * then one step per move, waste turn and result. Moves are numbered.
+ * Each move and turn also carries the play lab's sequence number (`seq`, draws included). An
+ * undone action keeps its number as a neutral step, in order, so every number has a line.
  */
-function stepsOf(tokens) {
+function stepsOf(tokens, undone = []) {
   const steps = [];
+  const gaps = [...undone].sort((a, b) => a - b);
+  const neutralUpTo = (seq) => {
+    while (gaps.length && (seq == null || gaps[0] < seq)) {
+      const g = gaps.shift();
+      steps.push({ key: `undone-${g}`, kind: 'undone', seq: g });
+    }
+  };
   let i = G.dealLength(tokens);
   if (i) steps.push({ key: tokens[0], kind: 'deal', tokens: tokens.slice(0, i) });
   let n = 0;
   for (; i < tokens.length; i++) {
     const t = tokens[i];
-    if (t.type === 'move') steps.push({ key: t, kind: 'move', token: t, number: ++n });
-    else if (t.type === 'turn') steps.push({ key: t, kind: 'turn', token: t });
+    if (t.type === 'move' || t.type === 'turn') neutralUpTo(t.seq);
+    else neutralUpTo(null);
+    if (t.type === 'move') steps.push({ key: t, kind: 'move', token: t, number: ++n, seq: t.seq });
+    else if (t.type === 'turn') steps.push({ key: t, kind: 'turn', token: t, seq: t.seq });
     else if (t.type === 'result') steps.push({ key: t, kind: 'eop', token: t });
   }
+  neutralUpTo(null);
   return steps;
 }
 
@@ -48,19 +60,24 @@ const fanOf = (t) => t.fan || (t.type === 'turn' ? t.cards : t.top ? [t.top] : [
 function stepEl(step) {
   const el = document.createElement('div');
   el.className = 'step';
-  let html = '';
+  // The sequence number, in a gray column down the step's left side (blank for the deal and EOP).
+  let html = `<span class="seq">${step.seq != null ? String(step.seq).padStart(3, '0') : ''}</span>`;
   if (step.kind === 'deal') {
-    html = '<span class="lbl">D</span>' + step.tokens.map((t, i) =>
+    html += '<span class="lbl">D</span>' + step.tokens.map((t, i) =>
       t.type === 'turn' ? lineHTML(fanOf(t), 'w', false, i + 1) : lineHTML([t.card], t.to, false, i + 1)).join('');
   } else if (step.kind === 'move') {
     const t = step.token;
     const left = t.from === 'w' ? fanOf(t) : t.top ? [t.top] : [];
-    html = `<span class="lbl">${step.number}</span>` + lineHTML([t.card], t.to, true, 1, G.judgeToken(t)) + lineHTML(left, t.from, t.from !== 'w', 2);
+    html += `<span class="lbl">${step.number}</span>` + lineHTML([t.card], t.to, true, 1, G.judgeToken(t)) + lineHTML(left, t.from, t.from !== 'w', 2);
   } else if (step.kind === 'turn') {
-    html = lineHTML(fanOf(step.token), 'w', false, 1);
+    html += lineHTML(fanOf(step.token), 'w', false, 1);
+  } else if (step.kind === 'undone') {
+    el.classList.add('undone');
+    el.title = 'Undone';
+    html += lineHTML([], '-', false, 1);
   } else {
     const t = step.token;
-    html = `<span class="lbl">EOP</span><span class="result ${t.won ? 'won' : 'lost'}">${G.tokenText(t)}</span>`;
+    html += `<span class="lbl">EOP</span><span class="result ${t.won ? 'won' : 'lost'}">${G.tokenText(t)}</span>`;
   }
   el.innerHTML = html;
   return el;
@@ -72,7 +89,7 @@ let shownKeys = [];
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export function renderRecord() {
   copyRecordBtn.disabled = !S.record || !S.record.length;
-  const steps = stepsOf(S.record || []);
+  const steps = stepsOf(S.record || [], S.undoneSeq);
   let same = 0;
   while (same < shownKeys.length && same < steps.length && shownKeys[same] === steps[same].key) same++;
   if (same === shownKeys.length && same === steps.length) return;

@@ -93,6 +93,7 @@ export function onDeal(state, deck) {
   n = 0;
   moveNo = 0;
   done = [];
+  S.undoneSeq = [];
   lastAt = performance.now();
   send({
     type: 'deal',
@@ -124,6 +125,7 @@ export function onAction(prev, next, token, { auto = false, retake = false } = {
   n += 1;
   if (kind === 'move') moveNo += 1;
   done.push({ n, kind });
+  token.seq = n;   // the Game Recorder shows it beside the line
   const event = {
     type: kind,
     n,
@@ -166,6 +168,7 @@ export function onUndo(toMark) {
   while (done.length > Math.max(0, target)) {
     const last = done.pop();
     if (last.kind === 'move') moveNo -= 1;
+    S.undoneSeq.push(last.n);
     send({ type: 'undo', undoes: last.n, note: done.length === target ? note : undefined });
   }
 }
@@ -175,6 +178,7 @@ export function onRetake(prev, next, token) {
   const last = done.pop();
   if (last) {
     if (last.kind === 'move') moveNo -= 1;
+    S.undoneSeq.push(last.n);
     send({ type: 'undo', undoes: last.n, retake: true });
   }
   onAction(prev, next, token, { retake: true });

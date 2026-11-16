@@ -1,5 +1,5 @@
 // What a player sees and does: shuffling, dealing, clicks, drags, the record, settings and layout.
-const { test, expect, openApp, pickShuffle, deal, settle, card, foundation, recordText, status, dragTo } = require('./helpers');
+const { test, expect, openApp, pickShuffle, deal, settle, card, foundation, recordText, seqLines, status, dragTo } = require('./helpers');
 
 test.describe('start and custom shuffles', () => {
   test('opens with a shuffled deck waiting to be dealt, and no errors', async ({ page }) => {
@@ -108,6 +108,21 @@ test.describe('play', () => {
     await expect.poll(() => recordText(page)).toBe('D A♠ a A♥ b 2♥ w');
   });
 
+  test('the Game Recorder numbers every action; an undone one keeps its number as a neutral line', async ({ page }) => {
+    await openApp(page);
+    await pickShuffle(page, 1);
+    await deal(page);
+    await card(page, 'AS').click();
+    await expect.poll(() => seqLines(page)).toEqual(['', '001']);
+    await page.locator('#undoBtn').click();
+    await expect.poll(() => seqLines(page)).toEqual(['', '001 undone']);
+    await expect(page.locator('#steps .step.undone .cards')).toHaveText('--');
+    await expect(page.locator('#steps .step.undone .pile')).toHaveText('-');
+    await card(page, 'AS').click();
+    await expect.poll(() => seqLines(page)).toEqual(['', '001 undone', '002']);
+    await expect.poll(() => recordText(page)).toBe('D A♠ a A♥ b 2♥ w 1 A♠ h -- a');
+  });
+
   test('turning the stock adds an unnumbered step; Undo reads Undo draw', async ({ page }) => {
     await openApp(page, { seed: 7 });
     await page.locator('#highestSel').selectOption('5');   // 10 cards: 3 in columns, 3 on the waste, 4 in the stock
@@ -119,7 +134,8 @@ test.describe('play', () => {
     await expect(page.locator('#steps .step').last()).toContainText(/w$/);
     await expect(page.locator('#undoBtn')).toHaveText('Undo draw');
     await page.locator('#undoBtn').click();
-    await expect(page.locator('#steps .step')).toHaveCount(before);
+    await expect(page.locator('#steps .step:not(.undone)')).toHaveCount(before);   // the draw's line turns neutral
+    await expect(page.locator('#steps .step.undone')).toHaveCount(1);
   });
 
   test('Restart deal deals the same shuffle again; End game records a loss', async ({ page }) => {

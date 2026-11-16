@@ -418,7 +418,8 @@ body {
      Archivo) + gap 0.8ch + four cards 8.9ch + gap 0.8ch + pile letter 1ch = 12.5ch, plus 0.5ch
      padding each side. (A move line with "999", about 2.4ch, needs only 6.2ch + gap.) Later
      lines of a step have no label, so they may use the label's space. */
-  width: 13.5ch;
+  --seq-w: 4.5ch;   /* the play lab's sequence numbers, in a gray column at the left */
+  width: calc(13.5ch + var(--seq-w));
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -434,9 +435,17 @@ body {
 .step {
   position: sticky; top: 0; bottom: 0;
   display: grid; grid-template-columns: auto 1fr auto; column-gap: 0.8ch; align-items: baseline;
-  padding: var(--step-pad) 0.5ch;
+  padding: var(--step-pad) 0.5ch var(--step-pad) calc(var(--seq-w) + 0.5ch);
   background: var(--card);
   white-space: nowrap;
+}
+/* The sequence number (draws and undone actions included), down the step's left side. */
+.step .seq {
+  position: absolute; left: 0; top: 0; bottom: 0; width: var(--seq-w);
+  box-sizing: border-box; padding: var(--step-pad) 0 0 0.9ch;
+  background: #bab9b4;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.12);
+  font: 400 0.95em/var(--step-line) 'Archivo', var(--font-ui); color: #444444;
 }
 /* Each step's top edge casts a shadow up onto the step above it (its blur also reaches below it,
    which is enough edge for a step sliding down over the one pinned at the bottom). */

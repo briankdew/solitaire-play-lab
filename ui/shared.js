@@ -10,6 +10,7 @@ export const S = {
   shuffleState: null,
   history: [],
   record: [],
+  undoneSeq: [],   // the play lab's numbers of undone actions (neutral lines in the Game Recorder)
   moves: 0,
   busy: false,
   closed: false,
