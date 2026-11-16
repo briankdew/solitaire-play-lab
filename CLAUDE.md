@@ -31,13 +31,14 @@ The player has played about 50,000 games by hand and leads the research. Follow 
   - two notes contradict each other.
 - **Don't ask when:** only one play was possible, or the note already explains the play.
 - **Plays with no note (from 2026-11-16):** the player leaves out the note when they think existing codes already cover the play. Code it from the existing codes (`--source inferred`) and don't ask. Ask in the app only when no code seems to cover it, or it looks like a new edge case of one.
-- **Draws with no note:** when there was no new play (see `new_play`: moving a run is a useful play only if the card it frees is immediately playable), assume NNP: code it `new_play` (`--source inferred`) and don't ask. If a new play appears to have been missed, say so in one line (the player asked for this; visible cards only).
+- **Draws with no note:** when there was no new play (see `NNP`: moving a run is a useful play only if the card it frees is immediately playable), assume NNP: code it `NNP` (`--source inferred`) and don't ask. If a new play appears to have been missed, say so in one line (the player asked for this; visible cards only).
 - **One question at a time, under 15 words,** about one action (`--n`). Plain words, the player's notation (`A♠h`, `4♥a`, `s`).
 - If the player is moving fast, skip questions and catch up in `/review`.
 - **New terms:** when the player describes something no code covers, suggest a short code, name and definition in one line (`tools/annotate.py --propose`). Adopt it only after the player agrees (`--adopt`). The player's own words go in the definition.
 - **Refining codes:** when the player's words extend, sharpen or qualify an existing code, update that code instead of creating a new one (`tools/annotate.py --update CODE --definition "..."`; the old wording is kept in its `history`). Use the player's words and say so in one line. Propose a new code only when the reason is genuinely different. The player may restate an existing code in new words without realizing it (or without finding it in the menu): code such a play with the existing code, refining it if the new words add something, rather than proposing a near-duplicate.
 
 ## Notation (from the player's game)
+- **Plays and draws:** a draw (a turn of the stock, `s`) is not a play. It is a neutral action needed for play to continue. (Some tools still list `s` among the "plays"; see `BACKLOG.md`.)
 - **Piles:** `s` stock, `w` waste, `h` home (foundations), `a b c …` columns.
 - **Cards:** rank then suit, X for ten (`XC`). Symbols on screen (`A♠`), letters in the official record (`AS`).
 - **Play keys:** card + destination: `ASh`, `4Ha`, shown as `A♠h`, `4♥a`. `s` is a turn of the stock; with the stock empty, it turns the waste back over first.
@@ -58,7 +59,8 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | `catalog/reasons.json` | The reason vocabulary, empty at the start and built from the player's words. |
 | `catalog/annotations.jsonl` | Claude's reading of each explained play. |
 | `catalog/reviews/` | One summary per reviewed game. |
-| `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py` (what the games hold). watch.py tags each play with what it does (`[w]`, `[reveals]`, `[empties d]`, `[frees 8♣: no play]`) and lists the new plays under `new_play`'s rule (`new: none (NNP)`): freshly available since the previous position, judged by the cards (not the columns), and useful. |
+| `BACKLOG.md` | Items the player has raised for later, kept until they're done or dropped. |
+| `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py` (what the games hold). watch.py tags each play with what it does (`[w]`, `[reveals]`, `[empties d]`, `[frees 8♣: no play]`) and lists the new plays under the player's definition (in `ONP` / `NNP`) (`new: none (NNP)`): freshly available since the previous position, judged by the cards (not the columns), and useful. |
 
 ## Tests
 - `npm test`: rule and lab tests (Node 18+), then the shuffle-index tests (Python).

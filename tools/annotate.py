@@ -86,6 +86,9 @@ def main():
     unknown = [c for c in wanted if c not in codes]
     if unknown:
         sys.exit(f"Unknown code(s): {', '.join(unknown)}. Propose them first (--propose).")
+    retired = [f"{c} ({codes[c].get('retired', 'retired')})" for c in wanted if codes[c].get("status") == "retired"]
+    if retired:
+        sys.exit(f"Retired code(s): {'; '.join(retired)}.")
     game = a.game or L.current_game()
     events = L.read_lines(L.game_path(game))
     action = next((e for e in events if e.get("type") in ("move", "turn") and e.get("n") == a.n), None)

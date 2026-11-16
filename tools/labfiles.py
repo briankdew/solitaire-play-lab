@@ -149,7 +149,7 @@ LETTERS = "abcdefghijklmnopqrstuvwxyz"
 
 def play_fact(view, key):
     """What a play does, from the visible position only, and whether it is useful under the
-    player's new_play code: a run moved from one face-up card to another is useful only when the
+    player's definition of a new play (ONP / NNP codes): a run moved from one face-up card to another is useful only when the
     card it frees is immediately playable (home, or onto another column); a play home is useful;
     taking a card back off home is not. Returns (fact, useful).
     Facts: 'w' (from the waste), 'from h' (back off home), 'reveals' (turns a face-down card over),
@@ -187,7 +187,7 @@ def play_fact(view, key):
 
 
 def play_identity(view, key):
-    """A play named by its cards, not its columns (new_play: 7♣ onto the 8♦ is the same play wherever
+    """A play named by its cards, not its columns (a new play: 7♣ onto the 8♦ is the same play wherever
     the 8♦ sits): (card, target), the target being the card it goes on, the top card of its suit's
     home pile ('h' plus that card, or 'h' alone for an ace), or an empty column ('empty d')."""
     if key == "s" or not view:
@@ -203,7 +203,7 @@ def play_identity(view, key):
 
 
 def fresh_keys(prev, e):
-    """The plays of action event e that are freshly available (new_play): not available, by the same
+    """The plays of action event e that are freshly available (a new play, ONP / NNP): not available, by the same
     cards, in the position before the previous action (`prev`, that action's event; None at the
     start of the game). After an Undo, `prev` is the action before the one taken back."""
     view = e.get("view")

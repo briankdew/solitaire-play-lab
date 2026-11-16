@@ -55,8 +55,10 @@ test.describe('think aloud', () => {
     await pickShuffle(page, SCREENSHOT_DEAL);
     await deal(page);
     const menu = page.locator('#labCode');
-    await expect(menu.locator('option[value="new_play"]')).toHaveCount(1);   // the adopted codes, from catalog/reasons.json
-    expect(await menu.locator('option[value="new_play"]').getAttribute('title')).toMatch(/freshly available/);   // hover shows the definition
+    await expect(menu.locator('option[value="NNP"]')).toHaveCount(1);   // the adopted codes, from catalog/reasons.json, NNP pinned once
+    await expect(menu.locator('option[value="most_hidden"]')).toHaveCount(1);
+    await expect(menu.locator('option[value="new_play"]')).toHaveCount(0);   // retired codes aren't offered
+    expect(await menu.locator('option[value="ONP"]').getAttribute('title')).toMatch(/freshly available/);   // hover shows the definition
     await menu.selectOption('ONP');
     await expect(page.locator('#labNote')).toHaveValue('ONP');
     await expect(page.locator('#labCodeDef')).toContainText('ONP: ');

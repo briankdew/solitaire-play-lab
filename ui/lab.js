@@ -243,11 +243,12 @@ export function insertAt(box, text, spaced = true) {
   box.setSelectionRange(at, at);
 }
 
-// The menu: NNP and ONP first, then the adopted codes from catalog/reasons.json, most used first
+// The menu: the NNP and ONP codes first, then the other adopted codes from catalog/reasons.json, most used first
 // (refreshed at each deal). Hovering an entry shows its definition; picking one shows it below.
-const SHORTHAND = [
-  { code: 'NNP', name: 'no new play', definition: 'No new play, so I draw (new_play).' },
-  { code: 'ONP', name: 'only new play', definition: 'Several plays may be available, but the play I made was the only new play (new_play).' },
+const PINNED = ['NNP', 'ONP'];
+const SHORTHAND = [   // used only when the server's list can't be read
+  { code: 'NNP', name: 'No new play', definition: 'No new play is available, so I draw.' },
+  { code: 'ONP', name: 'Only new play', definition: 'Multiple plays may be available, but the play I made was the only new play.' },
 ];
 let codeDefs = {};
 function codeOption(c, label) {
@@ -266,11 +267,13 @@ async function loadCodes() {
   codeDefs = {};
   const head = codeSel.options[0];
   codeSel.replaceChildren(head);
-  for (const c of SHORTHAND) { codeDefs[c.code] = c; codeSel.append(codeOption(c, `${c.code} · ${c.name}`)); }
-  if (items.length) {
+  const pinned = PINNED.map((code) => items.find((c) => c.code === code) || SHORTHAND.find((c) => c.code === code));
+  for (const c of pinned) { codeDefs[c.code] = c; codeSel.append(codeOption(c, `${c.code} · ${c.name}`)); }
+  const rest = items.filter((c) => !PINNED.includes(c.code));
+  if (rest.length) {
     const g = document.createElement('optgroup');
     g.label = 'Codes, most used first';
-    for (const c of items) { codeDefs[c.code] = c; g.append(codeOption(c, `${c.code} · ${c.name}`)); }
+    for (const c of rest) { codeDefs[c.code] = c; g.append(codeOption(c, `${c.code} · ${c.name}`)); }
     codeSel.append(g);
   }
   codeSel.value = '';
