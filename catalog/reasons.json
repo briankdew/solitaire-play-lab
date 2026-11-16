@@ -4,7 +4,7 @@
     {
       "code": "most_hidden",
       "name": "Uncover the most hidden",
-      "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards. The overarching strategy is to uncover the card on the columns that has the most potential to reveal more cards to be played.",
+      "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards. The overarching strategy is to uncover the card on the columns that has the most potential to reveal more cards to be played. Tie-break: when two cards are available to play with the same number of face-down cards above them, playing either gives the same prospect, so I select the column that has been \"least productive\" relative to its initial potential productivity (the face-down cards it started with). This simplifies to \"the playable card on the left-most column with the same (highest) number of face-down cards at the moment both cards simultaneously became playable.\"",
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-15",
@@ -12,6 +12,11 @@
         {
           "name": "Uncover the most hidden",
           "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Uncover the most hidden",
+          "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards. The overarching strategy is to uncover the card on the columns that has the most potential to reveal more cards to be played.",
           "until": "2026-11-16"
         }
       ]
@@ -52,15 +57,22 @@
     {
       "code": "keep_options",
       "name": "Keep options open",
-      "definition": "I don't want to make that decision prematurely. Not playing either of them until I have a king to put in the columns is an unnecessary decision that locks me into a position before I know what's coming next. Leaving them in place leaves my options open.",
+      "definition": "I don't want to make that decision prematurely. Not playing either of them until I have a king to put in the columns is an unnecessary decision that locks me into a position before I know what's coming next. Leaving them in place leaves my options open. Emptying a column is worth it only with a king available to replace the card AND a queen of opposite color in the tableau that could play on the king AND lead to a new play OR reveal a face-down card in the tableau.",
       "factors": [],
       "status": "adopted",
-      "source": "proposed in play, 2026-11-15"
+      "source": "proposed in play, 2026-11-15",
+      "history": [
+        {
+          "name": "Keep options open",
+          "definition": "I don't want to make that decision prematurely. Not playing either of them until I have a king to put in the columns is an unnecessary decision that locks me into a position before I know what's coming next. Leaving them in place leaves my options open.",
+          "until": "2026-11-16"
+        }
+      ]
     },
     {
       "code": "new_play",
       "name": "Only new plays",
-      "definition": "No new play, so I'll draw (\"NNP\"; earlier \"NNM\", changed to be consistent with my preferred use of the word \"play\" instead of \"move\"). / The 7♦w-a is the only new play, so I'll play it. / Moving a run from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
+      "definition": "No new play, so I'll draw (\"NNP\"; earlier \"NNM\", changed to be consistent with my preferred use of the word \"play\" instead of \"move\"). / The 7♦w-a is the only new play, so I'll play it (\"ONP\": only new play). / Moving a run from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-15",
@@ -73,6 +85,11 @@
         {
           "name": "Only new plays",
           "definition": "No new play, so I'll draw. / The 7♦w-a is the only new play, so I'll play it. / Moving a run from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Only new plays",
+          "definition": "No new play, so I'll draw (\"NNP\"; earlier \"NNM\", changed to be consistent with my preferred use of the word \"play\" instead of \"move\"). / The 7♦w-a is the only new play, so I'll play it. / Moving a run from one card to a matching card is only a \"useful\" play when freeing up the card that the moved card is blocking becomes immediately playable.",
           "until": "2026-11-16"
         }
       ]
@@ -112,10 +129,17 @@
     {
       "code": "home_pace",
       "name": "Home pace by colour",
-      "definition": "As a general rule, I try not to play a card to home if it is more than two ranks higher than the lowest card of the opposite color currently played to a home pile. A suit whose ace hasn't been played counts as 0 (e.g. 0♣).",
+      "definition": "As a general rule, I try not to play a card to home if it is more than two ranks higher than the lowest card of the opposite color currently played to a home pile. A suit whose ace hasn't been played counts as 0 (e.g. 0♣). It's an informal weighing of the odds: when not playing the card home gives no material advantage either, choosing WHERE to play it becomes the next consideration (e.g. 3♠h, since 3♠c would clog the 4♥ and duplicate the 3♣ as a target).",
       "factors": [],
       "status": "adopted",
-      "source": "proposed in play, 2026-11-16"
+      "source": "proposed in play, 2026-11-16",
+      "history": [
+        {
+          "name": "Home pace by colour",
+          "definition": "As a general rule, I try not to play a card to home if it is more than two ranks higher than the lowest card of the opposite color currently played to a home pile. A suit whose ace hasn't been played counts as 0 (e.g. 0♣).",
+          "until": "2026-11-16"
+        }
+      ]
     },
     {
       "code": "leftmost_target",
@@ -129,6 +153,93 @@
       "code": "hope_card",
       "name": "Hoping for a card",
       "definition": "In my mind, I'm hoping to reveal a particular card soon so a play can follow: e.g. a black 4 so I can reveal a card on g, especially because the stock pile is dwindling.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "waste_offset",
+      "name": "Offset the waste",
+      "definition": "On the first draw of a new game I will almost always leave one card on the waste pile. This ensures that a subsequent turn of the stock pile will offset each card by two positions, which increases the likelihood of a playable card being turned up in the waste the next time through. (From my experience with draw-3 game play, regardless of how many plays can be made from the initial draw of a new game, the likelihood that subsequent draws from the stock will not expose any new plays seems to occur more often than one might intuit.) By using the offset method, I at least give myself a chance at having a progressive play after the next stock turn. As a general rule, this applies to each new pass too: whenever the last card in the waste pile is the only available play. The rule is enforced less and less as the stock is depleted (and \"known\" cards become more obvious); at some point it becomes a \"gut feel\" decision (perhaps informed later by how many stock turns remain).",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16",
+      "history": [
+        {
+          "name": "Offset the waste",
+          "definition": "On the first draw of a new game I will almost always leave one card on the waste pile. This ensures that a subsequent turn of the stock pile will offset each card by two positions, which increases the likelihood of a playable card being turned up in the waste the next time through. (From my experience with draw-3 game play, regardless of how many plays can be made from the initial draw of a new game, the likelihood that subsequent draws from the stock will not expose any new plays seems to occur more often than one might intuit.) By using the offset method, I at least give myself a chance at having a progressive play after the next stock turn.",
+          "until": "2026-11-16"
+        }
+      ]
+    },
+    {
+      "code": "tableau_first",
+      "name": "Tableau and home first",
+      "definition": "I try to always maximize tableau and home plays before considering waste plays.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "auto_first",
+      "name": "Automatic plays first",
+      "definition": "When plays are functionally equivalent, I find that making the automatic plays as soon as they're available helps me to see the next potential waste-card play more directly, reducing my likelihood of not seeing a \"better\" subsequent play than the one currently being considered.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "no_clog",
+      "name": "Don't clog",
+      "definition": "As long as I have a higher-rank card to play that will open a column for a king (e.g. 7♣c), I won't \"clog\" a card (the 4♦) with low cards (3♣ and 2♦). I would put that move off as much as possible, hoping for the A♣ and 2♣ to get played first.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "keep_moving",
+      "name": "Keep it moving",
+      "definition": "A play made to keep the game \"moving\" (not necessarily progressing), e.g. the 3♥h-4♥h sequence.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "kings_out",
+      "name": "Kings out",
+      "definition": "An overarching principle: get all of the kings out as soon as possible. It seems intuitively progressive, affording the most flexibility and play availability, since it allows more options with the middle cards of a run (played down-rank on kings), and leads to more potential for cards in the remaining (unopen) columns to be revealed, and therefore played.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "foundation_set",
+      "name": "Foundation set",
+      "definition": "An overarching principle: get all of the aces on the foundation as soon as possible. It seems intuitively progressive, affording the most flexibility and play availability, since it allows more options with the middle cards of a run (played up-rank on the foundation), and leads to more potential for cards in the remaining (unopen) columns to be revealed, and therefore played.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "gut_feel",
+      "name": "Gut feel",
+      "definition": "A \"gut feel\" decision: intuitive hope/foresight or speculation, usually small and less impactful, that I can't easily define, because I don't have \"perfect knowledge\" of the stock pile and have zero knowledge of face-down tableau cards. Some decisions may ultimately have to remain as gut feel, but one of my goals is to minimize those with more informed rules that can still be derived without memorization tricks or card-counting hacks.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "cover_higher",
+      "name": "Cover the higher card",
+      "definition": "Higher-rank cards won't be played to the foundation before lower-rank cards (unless I'm eventually forced into \"keep moving\" play at some point), so when I must cover a card, covering the higher one makes more sense: e.g. covering the 8♦ with the 7♣ rather than covering the 3♣ with the 2♦.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "no_duplicate",
+      "name": "Don't duplicate a target",
+      "definition": "Playing a card that would only duplicate an existing target's availability has no apparent clear material advantage: e.g. the 3♣ is available to take the 2♦ (and clear column d if another king becomes playable), so playing 3♠c would currently duplicate that availability.",
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-16"
