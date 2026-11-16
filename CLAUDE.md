@@ -30,6 +30,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
   - a note uses a term that isn't in `catalog/reasons.json`,
   - two notes contradict each other.
 - **Don't ask when:** only one play was possible, or the note already explains the play.
+- **Plays with no note (from 2026-11-16):** the player leaves out the note when they think existing codes already cover the play. Code it from the existing codes (`--source inferred`) and don't ask. Ask in the app only when no code seems to cover it, or it looks like a new edge case of one.
 - **Draws with no note:** when there was no new play (see `new_play`: moving a run is a useful play only if the card it frees is immediately playable), assume NNP: code it `new_play` (`--source inferred`) and don't ask. If a new play appears to have been missed, say so in one line (the player asked for this; visible cards only).
 - **One question at a time, under 15 words,** about one action (`--n`). Plain words, the player's notation (`A♠h`, `4♥a`, `s`).
 - If the player is moving fast, skip questions and catch up in `/review`.
