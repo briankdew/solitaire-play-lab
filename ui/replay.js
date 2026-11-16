@@ -124,6 +124,7 @@ async function postJson(url, body) {
 
 async function load(reset) {
   const seq = ++loadSeq;
+  listEl.setAttribute('aria-busy', 'true');   // until the newest load has shown
   const base = reset ? [] : items;
   try {
     if (kind === 'deleted') {
@@ -144,6 +145,8 @@ async function load(reset) {
     render();
   } catch {
     if (seq === loadSeq) countEl.textContent = 'Could not load the list: is ./play still running?';
+  } finally {
+    if (seq === loadSeq) listEl.setAttribute('aria-busy', 'false');
   }
 }
 
@@ -253,6 +256,6 @@ moreBtn.addEventListener('click', () => load(false));
 for (const t of tabs) t.addEventListener('click', () => showKind(t.dataset.kind));
 setupSel.addEventListener('change', () => load(true));
 let searchTimer = 0;
-searchEl.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => load(true), 200); });
+searchEl.addEventListener('input', () => { listEl.setAttribute('aria-busy', 'true'); clearTimeout(searchTimer); searchTimer = setTimeout(() => load(true), 200); });
 modal.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } });
 modal.addEventListener('click', (e) => { if (e.target === modal) close(); });

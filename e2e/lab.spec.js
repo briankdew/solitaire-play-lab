@@ -18,6 +18,8 @@ async function eventsOf(page, count) {
   return readEvents(file);
 }
 const stock = (page) => page.locator('.slot.stock');
+/** Played shuffle's list once its newest load has shown (typing a search reloads it after a pause). */
+const listReady = (page) => expect(page.locator('#replayList')).toHaveAttribute('aria-busy', 'false');
 
 test.describe('think aloud', () => {
   test('records the deal and each play with the plays available, the note and think time', async ({ page }) => {
@@ -176,6 +178,7 @@ test.describe('played shuffles', () => {
     await expect(page.locator('#replaySetup')).toHaveValue('4223');
     const counter = String(Number(id.split('-')[1]));
     await page.locator('#replaySearch').fill(counter);
+    await listReady(page);
     const row = page.locator('.replay-row').filter({ hasText: id });
     await expect(row).toHaveCount(1);
     await expect(page.locator('#replayList')).not.toContainText('AS');   // no cards in the list
@@ -210,6 +213,7 @@ test.describe('exploratory games and deleting', () => {
     await page.locator('#replayBtn').click();
     await page.locator('.replay-tab[data-kind="exploratory"]').click();
     await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await listReady(page);
     await expect(page.locator('.replay-row').filter({ hasText: id })).toContainText('1 exploratory game');
     await page.locator('.replay-tab[data-kind="method"]').click();
     await expect(page.locator('.replay-row').filter({ hasText: id })).toHaveCount(0);
@@ -226,6 +230,7 @@ test.describe('exploratory games and deleting', () => {
     const file = await gameFile(page);
     await page.locator('#replayBtn').click();
     await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await listReady(page);
     const row = page.locator('.replay-row').filter({ hasText: id });
     await expect(row.getByRole('button', { name: 'Delete' })).toBeDisabled();   // being played
     await page.locator('#replayClose').click();
@@ -234,6 +239,7 @@ test.describe('exploratory games and deleting', () => {
 
     await page.locator('#replayBtn').click();
     await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await listReady(page);
     await row.getByRole('button', { name: 'Delete' }).click();
     await expect(row).toContainText('Delete it and its 1 game?');
     await row.getByRole('button', { name: 'Delete' }).click();
@@ -244,11 +250,13 @@ test.describe('exploratory games and deleting', () => {
 
     await page.locator('.replay-tab[data-kind="deleted"]').click();
     await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await listReady(page);
     await row.getByRole('button', { name: 'Restore' }).click();
     await expect(page.locator('#replayCount')).toContainText(`Restored ${id}`);
     expect(fs.existsSync(file)).toBe(true);
     await page.locator('.replay-tab[data-kind="method"]').click();
     await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await listReady(page);
     await expect(row).toContainText('lost 1');
   });
 });
