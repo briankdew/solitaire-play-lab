@@ -108,19 +108,23 @@ test.describe('think aloud', () => {
     await openApp(page);
     await pickShuffle(page, SCREENSHOT_DEAL);
     await deal(page);
+    await card(page, 'AS').click();
+    await settle(page);
     const game = path.basename(await gameFile(page), '.jsonl');
     fs.writeFileSync(path.join(live, 'question.json'), JSON.stringify({ id, game, n: 1, play: 'A♠h', text: 'Why A♠h before turning the stock?' }));
     await expect(page.locator('#labQText')).toHaveText('Why A♠h before turning the stock?', { timeout: 6000 });
-    await expect(page.locator('#labQMove')).toHaveText('about action 1 (A♠h)');
+    await expect(page.locator('#labQMove')).toHaveText('about #001, before you played A♠h');
+    await expect(page.locator('#steps .step.asked')).toHaveAttribute('data-seq', '1');   // its line is highlighted
     await page.locator('#labAnswer').fill('It costs nothing and opens a column.');
     await page.locator('#labAnswerSend').click();
     await expect(page.locator('#labQuestion')).toBeHidden();
+    await expect(page.locator('#steps .step.asked')).toHaveCount(0);
 
     const answers = readEvents(path.join(live, 'answers.jsonl')).filter((a) => a.question_id === id);
     expect(answers).toHaveLength(1);
     expect(answers[0]).toMatchObject({ game, n: 1, text: 'It costs nothing and opens a column.' });
     expect(JSON.parse(fs.readFileSync(path.join(live, 'question.json'), 'utf8')).answered).toBeTruthy();
-    const logged = (await eventsOf(page, 2)).filter((e) => e.type === 'answer');
+    const logged = (await eventsOf(page, 3)).filter((e) => e.type === 'answer');
     expect(logged[0]).toMatchObject({ question_id: id, text: 'It costs nothing and opens a column.' });
   });
 

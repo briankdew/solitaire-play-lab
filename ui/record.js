@@ -60,6 +60,10 @@ const fanOf = (t) => t.fan || (t.type === 'turn' ? t.cards : t.top ? [t.top] : [
 function stepEl(step) {
   const el = document.createElement('div');
   el.className = 'step';
+  if (step.seq != null) {
+    el.dataset.seq = step.seq;
+    if (step.seq === askedSeq) el.classList.add('asked');
+  }
   // The sequence number, in a gray column down the step's left side (000 for the deal, blank for EOP).
   let html = `<span class="seq">${step.seq != null ? String(step.seq).padStart(3, '0') : ''}</span>`;
   if (step.kind === 'deal') {
@@ -81,6 +85,13 @@ function stepEl(step) {
   }
   el.innerHTML = html;
   return el;
+}
+
+// The line Claude's open question is about, highlighted while the question shows (null: none).
+let askedSeq = null;
+export function markAsked(seq) {
+  askedSeq = seq == null ? null : Number(seq);
+  for (const el of stepsEl.children) el.classList.toggle('asked', askedSeq != null && Number(el.dataset.seq) === askedSeq);
 }
 
 // Bring the record up to date: keep the steps already shown, drop any that were undone,

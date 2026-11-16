@@ -3,6 +3,7 @@
 // panel says it isn't recording.
 import { G, S, setupCode } from './shared.js';
 import { setReplayAvailable } from './replay.js';
+import { markAsked } from './record.js';
 
 const P = window.LabPlays;
 
@@ -251,8 +252,12 @@ async function sendAnswer() {
 function showQuestion(q) {
   question = q && q.id ? q : null;
   qBox.hidden = !question;
+  markAsked(question && question.game === (game && game.id) ? question.n : null);
   if (!question) return;
-  qMove.textContent = question.n ? `about action ${question.n}${question.play ? ` (${question.play})` : ''}` : '';
+  // Which position: the line number in the Game Recorder (highlighted there) and the play made from it.
+  const line = question.n != null ? String(question.n).padStart(3, '0') : '';
+  const before = !question.play ? '' : question.play === 's' ? ', before your draw' : `, before you played ${question.play}`;
+  qMove.textContent = line ? `about #${line}${before}` : '';
   qText.textContent = question.text;
 }
 

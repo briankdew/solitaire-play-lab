@@ -565,6 +565,7 @@ body {
 }
 .lab-q-head { margin: 0; font-size: 0.75rem; font-weight: 600; color: var(--brass); }
 .lab-q-head span { font-weight: 400; color: var(--ink-muted); }
+.step.asked .seq { background: var(--brass); color: #ffffff; }   /* the line Claude's question is about */
 .lab-q-text { margin: 0; font-size: 1rem; }
 
 .lab-explore { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; cursor: pointer; }
