@@ -328,10 +328,17 @@
     {
       "code": "dead_end",
       "name": "Dead end",
-      "definition": "No pending progressive plays on the tableau or to/from the foundation, and a new full stock turn completed with no new plays becoming available: I select End game.",
+      "definition": "No pending progressive plays on the tableau or to/from the foundation, and a new full stock turn completed with no new plays becoming available: I select End game. I only play to win: a play that doesn't progress game play (e.g. J♦g, with every card face up) isn't worth making when no other progressive plays are available. Playing out all the remaining available plays would only take extra plays to lose the game, which makes no sense.",
       "factors": [],
       "status": "adopted",
-      "source": "proposed in play, 2026-11-16"
+      "source": "proposed in play, 2026-11-16",
+      "history": [
+        {
+          "name": "Dead end",
+          "definition": "No pending progressive plays on the tableau or to/from the foundation, and a new full stock turn completed with no new plays becoming available: I select End game.",
+          "until": "2026-11-16"
+        }
+      ]
     },
     {
       "code": "setup_play",
