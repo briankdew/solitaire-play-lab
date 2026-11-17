@@ -3,7 +3,7 @@
 Items raised for later. The player decides when each is taken up; each starts with a discussion.
 
 ## Next
-- **Restart the Play Lab server after the current game** (Ctrl+C, then `playlab`) so the reason-code menu lists every code and Pause game / Resume work: the running server predates `/api/codes` and `/api/paused`.
+- Nothing waiting.
 
 ## Later
 - **Flaky browser test:** "Delete asks first, moves the shuffle to Deleted, and Restore brings it back" still fails about one full run in three (passes alone). Find the remaining race. (Noted 2026-11-16.)
