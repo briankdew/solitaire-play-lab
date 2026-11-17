@@ -50,6 +50,9 @@ function faceHTML(c) {
   return frontHTML(c) + '<div class="back" aria-hidden="true"></div>';
 }
 function frontHTML(c) {
+  // Imported art (ui/cardart.js) for this card, stretched to the card; other cards keep the built-in face.
+  const art = S.faceArt && S.faceArt.cards.has(c.id);
+  if (art) return `<div class="face art ${G.isRed(c) ? 'red' : 'black'}" aria-hidden="true"><img src="/cardart/faces/${encodeURIComponent(S.faceArt.set)}/${c.id}.svg" alt="" draggable="false"></div>`;
   const sym = G.SUIT_SYMBOL[c.suit];
   const rank = rankLabel(c.rank);
   const center = c.rank > 10
@@ -61,6 +64,12 @@ function frontHTML(c) {
     `<span class="idx">${rank}<span>${sym}</span></span>${center}` +
     `<span class="idx br">${rank}<span>${sym}</span></span>` +
     `</div>`;
+}
+
+/** Draw the cards again, after the card faces in use change (ui/cardart.js). */
+export function rebuildCards() {
+  builtKey = '';
+  if (S.state) render();
 }
 
 /** Make sure the card elements and pile outlines match the current game. */

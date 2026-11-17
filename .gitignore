@@ -12,3 +12,6 @@ playwright-report/
 live/
 games/deleted/
 __pycache__/
+
+# imported card art (SVG faces and backs; may be someone else's design)
+cardart/

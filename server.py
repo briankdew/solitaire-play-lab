@@ -16,6 +16,10 @@ Standard library only. Besides serving the page, it has a small API used by ui/l
     GET  /api/deleted    deleted shuffles (games/deleted/), newest first
     POST /api/delete     {"id": shuffle id}: move its games to games/deleted/<id>/
     POST /api/restore    {"id": shuffle id}: undo a delete
+    GET  /api/cardart    imported card art: {"faces": [{"name", "cards"}], "backs": [names]}
+    POST /api/cardart    {"kind": "face", "set", "card", "svg"} or {"kind": "back", "name", "svg"}: save one SVG
+    POST /api/cardart/delete  {"kind": "face" | "back", "name"}: remove a face set or a back
+    GET  /cardart/faces/<set>/<card>.svg, /cardart/backs/<name>.svg   the SVG files (cardart/ is not committed)
 
 A deal event gets its shuffle's ID (see shuffles.py) before it is written, and the reply carries it.
 
@@ -29,19 +33,21 @@ import sys
 import threading
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
+from xml.etree import ElementTree
 
 import shuffles
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CATALOG = os.environ.get("LAB_CATALOG", os.path.join(ROOT, "catalog"))
-GAMES = LIVE = QUESTION = ANSWERS = CURRENT = INDEX = None  # set by use_data_dir()
+GAMES = LIVE = QUESTION = ANSWERS = CURRENT = INDEX = CARDART = None  # set by use_data_dir()
 
 
 def use_data_dir(data):
     """Where games/ and live/ go: the repository by default (--data for tests)."""
-    global GAMES, LIVE, QUESTION, ANSWERS, CURRENT, INDEX
+    global GAMES, LIVE, QUESTION, ANSWERS, CURRENT, INDEX, CARDART
     GAMES = os.path.join(data, "games")
+    CARDART = os.path.join(data, "cardart")   # imported SVG card faces and backs (not committed)
     LIVE = os.path.join(data, "live")
     QUESTION = os.path.join(LIVE, "question.json")
     ANSWERS = os.path.join(LIVE, "answers.jsonl")
@@ -135,6 +141,41 @@ def paused_list():
 
 
 GAME_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$")
+CARD_ID = re.compile(r"^[A2-9XJQK][SHCD]$")
+ART_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.-]{0,39}$")
+MAX_SVG_BODY = 6_000_000   # one SVG card file (court cards can be large)
+
+
+def is_svg(text):
+    """True if the text is an XML document whose root element is <svg>."""
+    try:
+        return ElementTree.fromstring(text.encode("utf-8")).tag.rsplit("}", 1)[-1] == "svg"
+    except (ElementTree.ParseError, ValueError):
+        return False
+
+
+def cardart_list():
+    """The imported card art: face sets (with the cards each has) and backs, by name."""
+    faces_dir, backs_dir = os.path.join(CARDART, "faces"), os.path.join(CARDART, "backs")
+    faces = []
+    if os.path.isdir(faces_dir):
+        for name in sorted(os.listdir(faces_dir)):
+            d = os.path.join(faces_dir, name)
+            if os.path.isdir(d) and ART_NAME.match(name):
+                cards = sorted(f[:-4] for f in os.listdir(d) if f.endswith(".svg") and CARD_ID.match(f[:-4]))
+                faces.append({"name": name, "cards": cards})
+    backs = sorted(f[:-4] for f in os.listdir(backs_dir) if f.endswith(".svg") and ART_NAME.match(f[:-4])) if os.path.isdir(backs_dir) else []
+    return {"faces": faces, "backs": backs}
+
+
+def cardart_file(path):
+    """The file for /cardart/faces/<set>/<card>.svg or /cardart/backs/<name>.svg, or None."""
+    parts = [unquote(p) for p in path.split("/")[2:]]
+    if len(parts) == 3 and parts[0] == "faces" and ART_NAME.match(parts[1]) and parts[2].endswith(".svg") and CARD_ID.match(parts[2][:-4]):
+        return os.path.join(CARDART, "faces", parts[1], parts[2])
+    if len(parts) == 2 and parts[0] == "backs" and parts[1].endswith(".svg") and ART_NAME.match(parts[1][:-4]):
+        return os.path.join(CARDART, "backs", parts[1])
+    return None
 MAX_BODY = 1_000_000
 lock = threading.Lock()
 
@@ -202,9 +243,9 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def read_body(self):
+    def read_body(self, limit=MAX_BODY):
         length = int(self.headers.get("Content-Length") or 0)
-        if length <= 0 or length > MAX_BODY:
+        if length <= 0 or length > limit:
             raise ValueError("bad length")
         return json.loads(self.rfile.read(length).decode("utf-8"))
 
@@ -257,6 +298,20 @@ class Handler(SimpleHTTPRequestHandler):
                 if not events or not any(e.get("type") == "end" for e in events) or paused_state(events):
                     return self.send_json({"error": "no such finished game"}, 404)
                 return self.send_json({"game": game, "events": events, "codes": game_codes(game)})
+        if path == "/api/cardart":
+            return self.send_json(cardart_list())
+        if path.startswith("/cardart/"):
+            f = cardart_file(path)
+            if not f or not os.path.isfile(f):
+                return self.send_error(404)
+            body = open(f, "rb").read()
+            self.send_response(200)
+            self.send_header("Content-Type", "image/svg+xml")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path == "/api/codes":
             with lock:
                 return self.send_json(codes_list())
@@ -266,7 +321,7 @@ class Handler(SimpleHTTPRequestHandler):
             q = read_json(QUESTION, {})
             return self.send_json(q if q and not q.get("answered") and not q.get("withdrawn") else {})
         top = path.lstrip("/").split("/", 1)[0]
-        if top in ("games", "live", "catalog", "tools", ".git", ".claude"):
+        if top in ("games", "live", "catalog", "tools", "cardart", ".git", ".claude"):
             return self.send_error(404)
         return super().do_GET()
 
@@ -276,9 +331,13 @@ class Handler(SimpleHTTPRequestHandler):
         if self.headers.get("Content-Type", "").split(";")[0] != "application/json":
             return self.send_json({"error": "json only"}, 415)
         try:
-            data = self.read_body()
+            data = self.read_body(MAX_SVG_BODY if path == "/api/cardart" else MAX_BODY)
         except (ValueError, UnicodeDecodeError):
             return self.send_json({"error": "bad body"}, 400)
+        if path == "/api/cardart":
+            return self.save_cardart(data)
+        if path == "/api/cardart/delete":
+            return self.delete_cardart(data)
         if path == "/api/event":
             return self.event(data)
         if path == "/api/answer":
@@ -286,6 +345,44 @@ class Handler(SimpleHTTPRequestHandler):
         if path in ("/api/delete", "/api/restore"):
             return self.delete_or_restore(path, data.get("id"))
         return self.send_json({"error": "not found"}, 404)
+
+    def save_cardart(self, data):
+        """Save one imported SVG: a card of a face set, or a back."""
+        svg = data.get("svg")
+        if not isinstance(svg, str) or not is_svg(svg):
+            return self.send_json({"error": "not an SVG file"}, 400)
+        kind = data.get("kind")
+        if kind == "face" and ART_NAME.match(str(data.get("set", ""))) and CARD_ID.match(str(data.get("card", ""))):
+            folder, name = os.path.join(CARDART, "faces", data["set"]), data["card"]
+        elif kind == "back" and ART_NAME.match(str(data.get("name", ""))):
+            folder, name = os.path.join(CARDART, "backs"), data["name"]
+        else:
+            return self.send_json({"error": "bad name"}, 400)
+        with lock:
+            os.makedirs(folder, exist_ok=True)
+            with open(os.path.join(folder, name + ".svg"), "w", encoding="utf-8") as f:
+                f.write(svg)
+        return self.send_json({"ok": True})
+
+    def delete_cardart(self, data):
+        """Remove a face set (its folder) or a back."""
+        kind, name = data.get("kind"), str(data.get("name", ""))
+        if not ART_NAME.match(name) or kind not in ("face", "back"):
+            return self.send_json({"error": "bad name"}, 400)
+        with lock:
+            if kind == "face":
+                d = os.path.join(CARDART, "faces", name)
+                if not os.path.isdir(d):
+                    return self.send_json({"error": "no such set"}, 404)
+                for f in os.listdir(d):
+                    os.remove(os.path.join(d, f))
+                os.rmdir(d)
+            else:
+                f = os.path.join(CARDART, "backs", name + ".svg")
+                if not os.path.isfile(f):
+                    return self.send_json({"error": "no such back"}, 404)
+                os.remove(f)
+        return self.send_json({"ok": True})
 
     def delete_or_restore(self, path, shuffle):
         global INDEX

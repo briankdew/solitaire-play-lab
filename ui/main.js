@@ -5,6 +5,7 @@ import { shuffledMessage, syncSettingsUI } from './settings.js';
 import { render } from './table.js';
 import { prepareNewShuffle, showWin } from './actions.js';
 import './input.js';   // only adds listeners, so nothing else imports it
+import './cardart.js';   // imported card faces and backs (settings)
 
 /* ---------- start ---------- */
 

@@ -671,3 +671,10 @@ body.studying .side-right .controls { display: none; }
 .study-list li.asked .study-n { color: #ffffff; background: var(--brass); border-radius: 4px; padding: 0 4px; }   /* the action Claude asks about */
 .study-close { justify-self: start; }
 .study-end { color: var(--brass); font-weight: 600; }
+
+/* ---------- Imported card art (ui/cardart.js): stretched to the card ---------- */
+.art-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }   /* the chooser, then Import… and Remove under it */
+.art-row select { grid-column: 1 / -1; min-width: 0; }
+.face.art { border: none; background: var(--card); }
+.face.art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; user-select: none; }
+[data-back-art] .back { border: none; background: var(--card) var(--back-art) center / 100% 100% no-repeat; }

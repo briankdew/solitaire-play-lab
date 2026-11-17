@@ -17,6 +17,7 @@ export const S = {
   suppressAuto: false,
   L: null,
   drag: null,
+  faceArt: null,   // imported card faces in use (ui/cardart.js): { set, cards: Set of card ids }, or null
 };
 
 export const G = window.SixCard;
