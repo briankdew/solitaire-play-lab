@@ -82,6 +82,8 @@ def run(game, follow):
                 t = e.get("type")
                 if t in ("deal", "mark") and "exploratory" in e:
                     explore = bool(e["exploratory"])
+                if not follow and seen == 0 and L.is_exploratory(events):
+                    explore = True      # a finished game counts as it ended (see CLAUDE.md)
                 if t in ("move", "turn"):
                     if explore or e.get("n") in done:
                         continue
