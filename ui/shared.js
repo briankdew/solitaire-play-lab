@@ -21,6 +21,9 @@ export const S = {
 
 export const G = window.SixCard;
 
+/** The game being replayed (index.html?replay=<game id>, ui/study.js), or null when playing. */
+export const STUDY_ID = new URLSearchParams(location.search).get('replay');
+
 export const AUTO_STEP_MS = 180;
 export const REFILL_LOCK_MS = 500; // after the refresh arrow, stock clicks are ignored this long (a reflex double click)
 export const DRAG_THRESHOLD = 5;

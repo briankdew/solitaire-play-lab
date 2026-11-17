@@ -1,5 +1,5 @@
 // Starting the page, and keeping a game in progress when the page updates on claude.ai.
-import { G, S, SAVE_RULES, say } from './shared.js';
+import { G, S, SAVE_RULES, STUDY_ID, say } from './shared.js';
 import { board } from './dom.js';
 import { shuffledMessage, syncSettingsUI } from './settings.js';
 import { render } from './table.js';
@@ -41,6 +41,7 @@ function start(saved) {
 
 // Keep the game in progress when the page is updated while open on claude.ai.
 const hot = window.claude && window.claude.hot;
-if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({ rules: SAVE_RULES, state: S.state, history: S.history, record: S.record, moves: S.moves, settings: S.settings, shuffleState: S.shuffleState, closed: S.closed }));
-if (hot && typeof hot.ready === 'function') hot.ready(start);
+if (STUDY_ID) import('./study.js').then((m) => m.startStudy(STUDY_ID));   // Replay: a finished game, read-only
+else if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({ rules: SAVE_RULES, state: S.state, history: S.history, record: S.record, moves: S.moves, settings: S.settings, shuffleState: S.shuffleState, closed: S.closed }));
+if (STUDY_ID) { /* started above */ } else if (hot && typeof hot.ready === 'function') hot.ready(start);
 else start((hot && hot.data) || {});

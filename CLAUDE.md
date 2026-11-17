@@ -50,6 +50,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | Path | What it is |
 |---|---|
 | `game.js`, `ui/`, `index.html`, `styles.css` | The game, copied from the player's solitaire-study app. Rules are unchanged; `ui/lab.js` and small hooks in `ui/actions.js` add the recording. |
+| `ui/study.js` | Replay (Played shuffle → Replay, `index.html?replay=<game id>`): a finished game step by step, read-only, from `/api/study`. Each step is the table before an action, with the note, answers and coded reasons; undone actions are skipped; available plays are not shown. |
 | `lab/plays.js` | The plays available in a position and the visible position. Nothing judges or scores a play. |
 | `lab/log.js` | Reading logs and replaying a game (Node). |
 | `server.py`, `play` | The local server and its start script. |

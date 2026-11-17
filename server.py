@@ -12,6 +12,7 @@ Standard library only. Besides serving the page, it has a small API used by ui/l
     GET  /api/setups     ?kind=method|exploratory: {setup: number of shuffles with games of that kind}
     GET  /api/shuffles   ?setup=K473&kind=method&q=&offset=0&limit=50: played shuffles, newest first (no cards)
     GET  /api/shuffle    ?id=K473-000001-7f3a9c21d4e8: one shuffle with its deck order, to replay it
+    GET  /api/study      ?id=<game id>: a finished game's log (with its deck) and its coded reasons, for Replay
     GET  /api/deleted    deleted shuffles (games/deleted/), newest first
     POST /api/delete     {"id": shuffle id}: move its games to games/deleted/<id>/
     POST /api/restore    {"id": shuffle id}: undo a delete
@@ -91,6 +92,17 @@ def codes_list():
              for r in reasons if r.get("status") == "adopted"]
     items.sort(key=lambda r: (-r["uses"], r["code"]))
     return {"items": items}
+
+
+def game_codes(game):
+    """The reason codes given to each action of a game, {n: [codes]}, in the order first given
+    (later annotations of the same action add to it)."""
+    out = {}
+    for a in read_lines(os.path.join(CATALOG, "annotations.jsonl")):
+        if a.get("game") == game:
+            codes = out.setdefault(str(a.get("n")), [])
+            codes += [c for c in a.get("codes", []) if c not in codes]
+    return out
 
 
 def paused_state(events):
@@ -232,6 +244,15 @@ class Handler(SimpleHTTPRequestHandler):
                 if not events or paused_state(events) != "paused":
                     return self.send_json({"error": "no such paused game"}, 404)
                 return self.send_json({"game": game, "events": events})
+        if path == "/api/study":
+            # A finished game, to replay it step by step: its log (the deck is needed to rebuild it) and
+            # the reason codes given to each action. Never a game still in play or paused.
+            game = args.get("id", "")
+            with lock:
+                events = read_lines(os.path.join(GAMES, game + ".jsonl")) if GAME_ID.match(game) else []
+                if not events or not any(e.get("type") == "end" for e in events) or paused_state(events):
+                    return self.send_json({"error": "no such finished game"}, 404)
+                return self.send_json({"game": game, "events": events, "codes": game_codes(game)})
         if path == "/api/codes":
             with lock:
                 return self.send_json(codes_list())

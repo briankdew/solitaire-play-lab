@@ -222,7 +222,7 @@ test.describe('played shuffles', () => {
     const row = page.locator('.replay-row').filter({ hasText: id });
     await expect(row).toHaveCount(1);
     await expect(page.locator('#replayList')).not.toContainText('AS');   // no cards in the list
-    await row.getByRole('button', { name: 'Replay' }).click();
+    await row.getByRole('button', { name: 'New game' }).click();
     await page.locator('#confirmContinue').click();   // a game is in play: confirm ending it
     await settle(page);
     await expect(page.locator('#replayModal')).toBeHidden();
@@ -232,6 +232,40 @@ test.describe('played shuffles', () => {
 
     const events = await eventsOf(page, 1);
     expect(events[0]).toMatchObject({ type: 'deal', shuffle: id, first_deal: false });
+  });
+
+  test('Replay steps through a finished game in a new tab, skipping undone actions and recording nothing', async ({ page }) => {
+    await openApp(page, { seed: 6161 });
+    await page.locator('#highestSel').selectOption('9');   // its own shuffle: no other test deals it
+    await deal(page);
+    const id = (await page.locator('#labShuffle b').textContent()).trim();
+    await stock(page).click();
+    await settle(page);
+    await page.keyboard.press('Control+z');   // taken back: Replay skips it
+    await settle(page);
+    await page.locator('#labNote').fill('Nothing to play yet');
+    await stock(page).click();
+    await settle(page);
+    await page.locator('#endGameBtn').click();
+    const logged = (await eventsOf(page, 5)).length;   // deal, turn, undo, turn, end
+
+    await page.locator('#replayBtn').click();
+    await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await listReady(page);
+    const row = page.locator('.replay-row').filter({ hasText: id });
+    const [tab] = await Promise.all([page.context().waitForEvent('page'), row.getByRole('button', { name: 'Replay' }).click()]);
+    await expect(tab.locator('#study')).toBeVisible();
+    await expect(tab.locator('#lab')).toBeHidden();
+    await expect(tab.locator('.study-list li')).toHaveCount(2);   // the draw that stood, then the end
+    await expect(tab.locator('.study-now')).toContainText('#2 draw (s)');
+    await expect(tab.locator('.study-now')).toContainText('Nothing to play yet');
+    await tab.keyboard.press('ArrowRight');
+    await expect(tab.locator('.study-now')).toContainText('Lost');
+    await tab.locator('.study-list li').first().click();
+    await expect(tab.locator('.study-now')).toContainText('#2 draw (s)');
+    await tab.close();
+    expect(readEvents(await gameFile(page)).length).toBe(logged);   // nothing recorded
+    await page.locator('#replayClose').click();
   });
 
   test('Review is off until a game of the shuffle is finished, then copies /review and the game ID', async ({ page }) => {

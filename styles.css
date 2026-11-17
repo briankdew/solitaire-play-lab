@@ -638,3 +638,32 @@ body {
   .dg-strip { transition: none !important; }
   .dg-new { animation: none; }
 }
+
+/* ---------- Replay (ui/study.js, index.html?replay=<game id>): a finished game, read-only ---------- */
+body.studying .side-left .lab, body.studying .toolbar, body.studying .undo-btn, body.studying .diagram-btn,
+body.studying .side-right .controls { display: none; }
+.study { display: grid; gap: 8px; width: 18rem; max-width: 100%; }
+.side-left .study { width: 100%; max-width: 36rem; justify-self: center; }
+.study-game { margin: 0; font-size: 0.75rem; color: var(--ink-muted); overflow-wrap: anywhere; }
+.study-bar { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.study-bar .btn { min-width: 2.2rem; }
+.study-play { min-width: 4rem !important; }
+.study-speed { font: inherit; font-size: 0.8rem; color: var(--ink); background: transparent; border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent); border-radius: 6px; padding: 3px 4px; }
+.study-speed option { color: #1d1d1d; background: #ffffff; }
+.study-speed:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
+.study-count { margin: 0; font-size: 0.75rem; color: var(--ink-muted); }
+.study-now { display: grid; gap: 4px; min-height: 3.2em; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.study-now p { margin: 0; font-size: 0.85rem; }
+.study-head b { font-weight: 700; }
+.study-note { color: var(--ink); white-space: pre-wrap; }
+.study-q { color: var(--ink-muted); font-style: italic; }
+.study-codes { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+.study-code { font-size: 0.7rem; padding: 1px 6px; border-radius: 999px; color: var(--ink); background: color-mix(in srgb, var(--brass) 28%, transparent); }
+.study-list { list-style: none; margin: 0; padding: 0; max-height: 22rem; overflow-y: auto; display: grid; align-content: start;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); }
+.study-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; padding: 3px 6px; font-size: 0.8rem; cursor: pointer; border-radius: 4px; }
+.study-list li:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.study-list li.cur { background: color-mix(in srgb, var(--brass) 30%, transparent); }
+.study-n { min-width: 2.6em; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.study-act { min-width: 4.5em; }
+.study-mark { color: var(--brass); }

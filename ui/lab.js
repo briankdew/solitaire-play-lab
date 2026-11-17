@@ -1,7 +1,7 @@
 // Think aloud: records every action of a game, with your notes, through the play-lab server
 // (server.py), and shows Claude's questions. Without the server the page plays as usual and the
 // panel says it isn't recording.
-import { G, S, setupCode } from './shared.js';
+import { G, S, STUDY_ID, setupCode } from './shared.js';
 import { setReplayAvailable } from './replay.js';
 import { markAsked } from './record.js';
 
@@ -419,6 +419,7 @@ function setStatus(on, message) {
 function showStatus() { if (recording) setStatus(true); }
 
 async function start() {
+  if (STUDY_ID) return;   // Replay records nothing and asks nothing (its panel is hidden)
   try { exploreChk.checked = localStorage.getItem(EXPLORE_KEY) === 'on'; } catch { /* ignore */ }
   showExploratory();
   exploreChk.addEventListener('change', onExploreChange);

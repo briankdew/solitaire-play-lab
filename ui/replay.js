@@ -4,7 +4,7 @@
 //   Paused        games stopped with Pause game, to be resumed
 //   Deleted       deleted shuffles, which can be restored
 // Each row has the shuffle ID, how often it was played and how those games ended, and buttons to
-// replay, review or delete it (or restore it). Shows no cards: a deck order is fetched only to replay it.
+// deal it again (New game), replay or review a finished game, or delete it (or restore it). Shows no cards: a deck order is fetched only to replay it.
 // Review copies `/review <game id>` to paste into Claude Code (a browser can't start a session).
 import { G, S, inPlay, say } from './shared.js';
 import { confirmReshuffle, dealShuffle, prepareNewShuffle, resumeGame } from './actions.js';
@@ -90,9 +90,11 @@ function row(s) {
     const del = button('Delete', () => askDelete(li, s));
     if (shuffleInPlay() === s.id) { del.disabled = true; del.title = 'This shuffle is being played'; }
     const games = s.finished || [];
-    const rev = button('Review', () => (games.length === 1 ? copyReview(games[0].game) : chooseReview(li, s)));
-    if (!games.length) { rev.disabled = true; rev.title = 'No finished game to review yet'; }
-    actions.append(button('Replay', () => replay(s.id)), rev, del);
+    const pick = (what, act) => () => (games.length === 1 ? act(games[0].game) : chooseGame(li, s, what, act));
+    const watch = button('Replay', pick('Replay which game?', openReplay));
+    const rev = button('Review', pick('Review which game?', copyReview));
+    for (const b of [watch, rev]) if (!games.length) { b.disabled = true; b.title = 'No finished game yet'; }
+    actions.append(button('New game', () => replay(s.id)), watch, rev, del);
   }
   li.append(info, actions);
   return li;
@@ -101,13 +103,18 @@ function row(s) {
 /** Deleting asks first, in the row: the shuffle and every game of it, of both kinds. */
 const RESULT = { W: 'won', L: 'lost', quit: 'forfeited', abandoned: 'left' };
 
-/** A shuffle played more than once: pick which game to review, newest first. */
-function chooseReview(li, s) {
+/** A shuffle played more than once: pick which game to replay or review, newest first. */
+function chooseGame(li, s, question, act) {
   const actions = li.querySelector('.replay-actions');
-  actions.replaceChildren(textEl('replay-confirm', 'Review which game?'),
+  actions.replaceChildren(textEl('replay-confirm', question),
     ...s.finished.map((g) => button(`${dateOf(g.t)} ${g.t ? g.t.slice(11, 16) : ''} ${RESULT[g.result] || g.result}`,
-      () => { copyReview(g.game); li.replaceWith(row(s)); })),
+      () => { act(g.game); li.replaceWith(row(s)); })),
     button('Cancel', () => li.replaceWith(row(s))));
+}
+
+/** Replay a finished game in a new tab: step through it, read-only (ui/study.js). */
+function openReplay(game) {
+  window.open(`${location.pathname}?replay=${encodeURIComponent(game)}`, '_blank');
 }
 
 /** Copy `/review <game id>` for Claude Code; if the clipboard is unavailable, show it to copy by hand. */
