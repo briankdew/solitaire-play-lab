@@ -172,7 +172,7 @@
     {
       "code": "waste_offset",
       "name": "Offset the waste",
-      "definition": "On the first draw of a new game I will almost always leave one card on the waste pile. This ensures that a subsequent turn of the stock pile will offset each card by two positions, which increases the likelihood of a playable card being turned up in the waste the next time through. (From my experience with draw-3 game play, regardless of how many plays can be made from the initial draw of a new game, the likelihood that subsequent draws from the stock will not expose any new plays seems to occur more often than one might intuit.) By using the offset method, I at least give myself a chance at having a progressive play after the next stock turn. As a general rule, this applies to each new pass too: whenever the last card in the waste pile is the only available play. The rule is enforced less and less as the stock is depleted (and \"known\" cards become more obvious); at some point it becomes a \"gut feel\" decision (perhaps informed later by how many stock turns remain).",
+      "definition": "On the first draw of a new game I will almost always leave one card on the waste pile. This ensures that a subsequent turn of the stock pile will offset each card by two positions, which increases the likelihood of a playable card being turned up in the waste the next time through. (From my experience with draw-3 game play, regardless of how many plays can be made from the initial draw of a new game, the likelihood that subsequent draws from the stock will not expose any new plays seems to occur more often than one might intuit.) By using the offset method, I at least give myself a chance at having a progressive play after the next stock turn. As a general rule, this applies to each new pass too: whenever the last card in the waste pile is the only available play. The rule is enforced less and less as the stock is depleted (and \"known\" cards become more obvious); at some point it becomes a \"gut feel\" decision (perhaps informed later by how many stock turns remain). The size of the stock informs it: with more than three cards in the stock pile (the game shows when 3 or fewer remain, which I could easily know with a physical deck), I may decline to play the last waste card (e.g. 5♦, anywhere) and set up another play instead.",
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-16",
@@ -180,6 +180,11 @@
         {
           "name": "Offset the waste",
           "definition": "On the first draw of a new game I will almost always leave one card on the waste pile. This ensures that a subsequent turn of the stock pile will offset each card by two positions, which increases the likelihood of a playable card being turned up in the waste the next time through. (From my experience with draw-3 game play, regardless of how many plays can be made from the initial draw of a new game, the likelihood that subsequent draws from the stock will not expose any new plays seems to occur more often than one might intuit.) By using the offset method, I at least give myself a chance at having a progressive play after the next stock turn.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Offset the waste",
+          "definition": "On the first draw of a new game I will almost always leave one card on the waste pile. This ensures that a subsequent turn of the stock pile will offset each card by two positions, which increases the likelihood of a playable card being turned up in the waste the next time through. (From my experience with draw-3 game play, regardless of how many plays can be made from the initial draw of a new game, the likelihood that subsequent draws from the stock will not expose any new plays seems to occur more often than one might intuit.) By using the offset method, I at least give myself a chance at having a progressive play after the next stock turn. As a general rule, this applies to each new pass too: whenever the last card in the waste pile is the only available play. The rule is enforced less and less as the stock is depleted (and \"known\" cards become more obvious); at some point it becomes a \"gut feel\" decision (perhaps informed later by how many stock turns remain).",
           "until": "2026-11-16"
         }
       ]
@@ -363,6 +368,14 @@
       "code": "hedge_play",
       "name": "Hedge play",
       "definition": "The more advantageous play that also hedges against an unfortunate card sequence: e.g. playing 9♠h to preserve the waste_offset in case of an unfortunate sequence in the last three waste cards, given the high potential to win based on the current game state.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "higher_first",
+      "name": "Higher-rank first",
+      "definition": "Prefer the more advantageous progressive play that moves higher-rank cards: it also has the potential to free up lower-rank cards and takes advantage of the \"Kings out!\" and \"Foundation set\" theory of upward and downward card play (e.g. waiting a few moves to play X♥ rather than 5♥h, 6♥h and 6♦g now).",
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-16"
