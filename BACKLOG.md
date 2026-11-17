@@ -3,7 +3,7 @@
 Items raised for later. The player decides when each is taken up; each starts with a discussion.
 
 ## Next
-- **Review of K473-000010:** finish it in Replay (questions #51, #80, #84: draws made while a new play existed). (2026-11-17)
+- Nothing waiting.
 
 ## Later
 - **Play profiles:** play or replay shuffles with different strategies, or let other people play and record their reasoning. To settle: is a profile a person, a strategy or both; a reason vocabulary per profile (clean slate per player); how profiles show in logs, Played shuffle and the tools; how they relate to exploratory games. (Raised 2026-11-16.)

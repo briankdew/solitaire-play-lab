@@ -117,10 +117,17 @@
     {
       "code": "king_column",
       "name": "King to an empty column",
-      "definition": "Because my goal is to not use memory/card-counting, playing a king is an automatic play, similar to the reason for always playing an ace on its home pile.",
+      "definition": "Because my goal is to not use memory/card-counting, playing a king is an automatic play, similar to the reason for always playing an ace on its home pile. Exception: when the king would only serve as a place to play a queen that is already at the top of a column (e.g. K♠ for Q♦, already at the top of d), moving it to the empty column is \"a wasted move\".",
       "factors": [],
       "status": "adopted",
-      "source": "proposed in play, 2026-11-15"
+      "source": "proposed in play, 2026-11-15",
+      "history": [
+        {
+          "name": "King to an empty column",
+          "definition": "Because my goal is to not use memory/card-counting, playing a king is an automatic play, similar to the reason for always playing an ace on its home pile.",
+          "until": "2026-11-17"
+        }
+      ]
     },
     {
       "code": "pass_memory",
@@ -141,7 +148,7 @@
     {
       "code": "home_pace",
       "name": "Home pace by colour",
-      "definition": "As a general rule, I try not to play a card to home if it is more than two ranks higher than the lowest card of the opposite color currently played to a home pile. A suit whose ace hasn't been played counts as 0 (e.g. 0♣). It's an informal weighing of the odds: when not playing the card home gives no material advantage either, choosing WHERE to play it becomes the next consideration (e.g. 3♠h, since 3♠c would clog the 4♥ and duplicate the 3♣ as a target).",
+      "definition": "As a general rule, I try not to play a card to home if it is more than two ranks higher than the lowest card of the opposite color currently played to a home pile. A suit whose ace hasn't been played counts as 0 (e.g. 0♣). It's an informal weighing of the odds: when not playing the card home gives no material advantage either, choosing WHERE to play it becomes the next consideration (e.g. 3♠h, since 3♠c would clog the 4♥ and duplicate the 3♣ as a target). When a pile is already further ahead than I prefer (e.g. 8♦ three ranks above 5♣, likely a strategic decision that went against the preference), adding to it (9♦h) \"only compounds an already unpreferred situation.\"",
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-16",
@@ -150,6 +157,11 @@
           "name": "Home pace by colour",
           "definition": "As a general rule, I try not to play a card to home if it is more than two ranks higher than the lowest card of the opposite color currently played to a home pile. A suit whose ace hasn't been played counts as 0 (e.g. 0♣).",
           "until": "2026-11-16"
+        },
+        {
+          "name": "Home pace by colour",
+          "definition": "As a general rule, I try not to play a card to home if it is more than two ranks higher than the lowest card of the opposite color currently played to a home pile. A suit whose ace hasn't been played counts as 0 (e.g. 0♣). It's an informal weighing of the odds: when not playing the card home gives no material advantage either, choosing WHERE to play it becomes the next consideration (e.g. 3♠h, since 3♠c would clog the 4♥ and duplicate the 3♣ as a target).",
+          "until": "2026-11-17"
         }
       ]
     },
