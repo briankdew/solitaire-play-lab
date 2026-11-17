@@ -1,7 +1,7 @@
 // Replay (index.html?replay=<game id>, opened from Played shuffle): a finished game, one action at a
-// time, read-only, "like replaying a chess match". Each step shows the table as the player saw it
-// before an action, and the action taken with the player's note, Claude's questions and the
-// player's answers, and the reason codes it was given. Undone actions are skipped (in the play lab an
+// time, read-only, "like replaying a chess match". Step #0 is the deal; each later step shows the table
+// after an action, with the action, the player's note, Claude's questions and the player's answers,
+// and the reason codes it was given. Undone actions are skipped (in the play lab an
 // Undo corrects a mistake). The plays that were available are not shown: what the player saw, as
 // they saw it. Nothing is recorded.
 import { G, S, say } from './shared.js';
@@ -40,7 +40,7 @@ function btn(text, title, onClick, cls = 'btn small') {
 const secs = (ms) => `${((ms || 0) / 1000).toFixed(1)}s`;
 const actionText = (a) => (a.type === 'turn' ? 'draw (s)' : a.text);
 
-/** Rebuild the game from its deal: one step per standing action, then the final table. */
+/** Rebuild the game: the deal (step 0), then the table after each standing action (the last one ends the game). */
 function buildSteps(events) {
   let state = dealFromLog(events[0]);
   syncSettingsUI();   // the setup line over the table (it saves nothing)
@@ -50,7 +50,7 @@ function buildSteps(events) {
   for (const e of events) if (e.type === 'answer') (answers[e.n] = answers[e.n] || []).push({ question: e.question, text: e.text });
   // A note added between actions ("Add now") goes with the next action.
   const between = events.filter((e) => e.type === 'note');
-  const out = [];
+  const out = [{ state, record: record.slice(), action: null, notes: [], answers: [] }];
   let prevN = 0;
   for (const a of actions) {
     const r = P.apply(state, a.key);
@@ -59,13 +59,13 @@ function buildSteps(events) {
     const notes = between.filter((e) => e.after >= prevN && e.after < a.n).map((e) => e.text);
     prevN = a.n;
     if (a.note) notes.push(a.note);
-    out.push({ state, record: record.slice(), action: a, notes, answers: answers[a.n] || [] });
     record.push(token);
     state = next;
+    out.push({ state, record: record.slice(), action: a, notes, answers: answers[a.n] || [] });
   }
-  const end = events.filter((e) => e.type === 'end').pop();
-  if (end && (end.result === 'W' || end.result === 'L')) record.push(G.resultToken(record, end.result === 'W'));
-  out.push({ state, record: record.slice(), action: null, notes: [], answers: [], end });
+  const last = out[out.length - 1];
+  last.end = events.filter((e) => e.type === 'end').pop();
+  if (last.end && (last.end.result === 'W' || last.end.result === 'L')) last.record.push(G.resultToken(record, last.end.result === 'W'));
   return out;
 }
 
@@ -164,8 +164,9 @@ function fillList() {
       if (st.notes.length || st.answers.length) li.append(h('span', 'study-mark', '✎'));
       li.append(chips(codes[st.action.n] || []));
     } else {
-      li.append(h('span', 'study-n', ''), h('span', 'study-act', endText(st.end)));
+      li.append(h('span', 'study-n', '#0'), h('span', 'study-act', 'Deal'));
     }
+    if (st.end) li.append(h('span', 'study-end', endText(st.end)));
     ui.list.append(li);
   });
 }
@@ -178,9 +179,16 @@ function endText(end) {
 function showNow(st) {
   const box = ui.now;
   box.replaceChildren();
+  const ending = () => {
+    if (!st.end) return;
+    box.append(h('p', 'study-head study-result', `${endText(st.end)}${st.end.moves != null ? ` in ${st.end.moves} moves` : ''}.`));
+    if (st.end.note) box.append(h('p', 'study-note', st.end.note));
+  };
   if (!st.action) {
-    box.append(h('p', 'study-head', `${endText(st.end)}${st.end && st.end.moves != null ? ` in ${st.end.moves} moves` : ''}.`));
-    if (st.end && st.end.note) box.append(h('p', 'study-note', st.end.note));
+    const head = h('p', 'study-head');
+    head.append(h('b', null, '#0 Deal'), document.createTextNode(' · the table as dealt'));
+    box.append(head);
+    ending();
     return;
   }
   const a = st.action;
@@ -199,6 +207,7 @@ function showNow(st) {
     p.append(chips(list));
     box.append(p);
   }
+  ending();
 }
 
 /* ---------- moving through the game ---------- */
@@ -213,7 +222,7 @@ function go(i) {
   S.closed = true;
   render();
   const n = steps.length - 1;
-  ui.count.textContent = cur < n ? `Step ${cur + 1} of ${n}: the table before this action` : 'The final table';
+  ui.count.textContent = cur === 0 ? `Step 0 of ${n}: the deal` : `Step ${cur} of ${n}: the table after #${steps[cur].action.n}`;
   ui.first.disabled = ui.back.disabled = cur === 0;
   ui.fwd.disabled = ui.last.disabled = cur === n;
   if (!timer) ui.play.disabled = cur === n;
@@ -251,14 +260,15 @@ document.addEventListener('keydown', (e) => {
 /* ---------- /review questions ---------- */
 
 const stepOf = (n) => steps.findIndex((st) => st.action && st.action.n === n);
-function goToQuestion() { if (question) { const i = stepOf(question.n); if (i >= 0) go(i); } }
+// The table the decision was made from: the step before the action asked about.
+function goToQuestion() { if (question) { const i = stepOf(question.n); if (i >= 0) go(i - 1); } }
 
 function showQuestion(q) {
   question = q;
   ui.qBox.hidden = !q;
   if (q) {
     const st = steps[stepOf(q.n)];
-    ui.qHead.textContent = `Claude asks about #${q.n}${st ? ` (${actionText(st.action)})` : ''}`;
+    ui.qHead.textContent = `Claude asks about #${q.n}${st ? ` (${actionText(st.action)})` : ''}: the table before it`;
     ui.qText.textContent = q.text;
     stop();
     goToQuestion();

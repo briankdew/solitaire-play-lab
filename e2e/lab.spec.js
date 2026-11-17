@@ -228,15 +228,16 @@ test.describe.serial('Claude\'s questions', () => {
     const q = tab.locator('.study-question');
     await expect(q).toBeVisible();
     await expect(q).toContainText('Why draw again?');
-    await expect(tab.locator('.study-now')).toContainText('#2 draw (s)');   // jumped to the action
+    await expect(tab.locator('.study-now')).toContainText('#1 draw (s)');   // jumped to the table before #2
     await expect(tab.locator('.study-list li.asked')).toHaveCount(1);
     await tab.keyboard.press('Home');
-    await expect(tab.locator('.study-now')).toContainText('#1 draw (s)');
+    await expect(tab.locator('.study-now')).toContainText('#0 Deal');
     await q.getByRole('button', { name: 'Go to the question' }).click();
-    await expect(tab.locator('.study-now')).toContainText('#2 draw (s)');
+    await expect(tab.locator('.study-now')).toContainText('#1 draw (s)');
     await q.locator('textarea').fill('Still nothing to play');
     await q.getByRole('button', { name: 'Send answer' }).click();
     await expect(q).toBeHidden();
+    await tab.keyboard.press('ArrowRight');
     await expect(tab.locator('.study-now')).toContainText('Still nothing to play');
     expect(JSON.parse(fs.readFileSync(path.join(live, 'question.json'), 'utf8')).answered).toBeTruthy();
     const answer = readEvents(await gameFile(page)).find((e) => e.type === 'answer');
@@ -301,13 +302,15 @@ test.describe('played shuffles', () => {
     const [tab] = await Promise.all([page.context().waitForEvent('page'), row.getByRole('button', { name: 'Replay' }).click()]);
     await expect(tab.locator('#study')).toBeVisible();
     await expect(tab.locator('#lab')).toBeHidden();
-    await expect(tab.locator('.study-list li')).toHaveCount(2);   // the draw that stood, then the end
+    await expect(tab.locator('.study-list li')).toHaveCount(2);   // the deal, then the draw that stood
+    await expect(tab.locator('.study-list li.cur')).toContainText('Deal');   // it opens on the deal
+    await expect(tab.locator('.study-now')).toContainText('#0 Deal');
+    await tab.keyboard.press('ArrowRight');   // the table after the draw, which ended the game
     await expect(tab.locator('.study-now')).toContainText('#2 draw (s)');
     await expect(tab.locator('.study-now')).toContainText('Nothing to play yet');
-    await tab.keyboard.press('ArrowRight');
     await expect(tab.locator('.study-now')).toContainText('Lost');
     await tab.locator('.study-list li').first().click();
-    await expect(tab.locator('.study-now')).toContainText('#2 draw (s)');
+    await expect(tab.locator('.study-now')).toContainText('#0 Deal');
     await Promise.all([tab.waitForEvent('close'), tab.getByRole('button', { name: 'Close the replay' }).click()]);
     expect(readEvents(await gameFile(page)).length).toBe(logged);   // nothing recorded
     await page.locator('#replayClose').click();
