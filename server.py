@@ -222,7 +222,11 @@ class Handler(SimpleHTTPRequestHandler):
             except ValueError:
                 return self.send_json({"error": "bad offset or limit"}, 400)
             with lock:
-                return self.send_json(INDEX.listing(args.get("setup"), args.get("q", ""), offset, limit, kind))
+                out = INDEX.listing(args.get("setup"), args.get("q", ""), offset, limit, kind)
+            for item in out["items"]:   # a game is reviewed once /review has written its summary
+                for g in item.get("finished", []):
+                    g["reviewed"] = os.path.exists(os.path.join(CATALOG, "reviews", g["game"] + ".md"))
+            return self.send_json(out)
         if path == "/api/shuffle":
             with lock:
                 rec = INDEX.get(args.get("id", ""))

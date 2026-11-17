@@ -287,8 +287,15 @@ test.describe('played shuffles', () => {
     const events = await eventsOf(page, 2);
     expect(events[events.length - 1]).toMatchObject({ type: 'end', result: 'L' });
     row = await openRow();
+    await expect(row).toContainText('not reviewed');
     await row.getByRole('button', { name: 'Review' }).click();
     await expect(page.locator('#replayCount')).toContainText(/\/review 9\S+/);
+    await page.locator('#replayClose').click();
+    // Once /review has written the game's summary, the row says so.
+    const game = await page.locator('#lab').getAttribute('data-game');
+    fs.writeFileSync(path.join(DATA, 'catalog', 'reviews', `${game}.md`), '# Review\n');
+    row = await openRow();
+    await expect(row).toContainText(/· reviewed/);
     await page.locator('#replayClose').click();
   });
 });

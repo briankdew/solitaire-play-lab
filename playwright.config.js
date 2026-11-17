@@ -19,7 +19,9 @@ module.exports = defineConfig({
   } }],
   webServer: {
     // The play-lab server (static files plus the recording API), writing games to a scratch folder.
-    command: 'rm -rf .lab-test-data && python3 server.py --port 4319 --host 127.0.0.1 --data .lab-test-data',   // fresh each run
+    // Fresh each run, with its own catalog (the reason codes copied; reviews and annotations start empty).
+    command: 'rm -rf .lab-test-data && mkdir -p .lab-test-data/catalog/reviews && cp catalog/reasons.json .lab-test-data/catalog/'
+      + ' && LAB_CATALOG=.lab-test-data/catalog python3 server.py --port 4319 --host 127.0.0.1 --data .lab-test-data',
     url: 'http://127.0.0.1:4319/index.html',
     reuseExistingServer: false,   // never test some other server that happens to hold the port
   },

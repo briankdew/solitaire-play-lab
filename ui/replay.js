@@ -83,6 +83,9 @@ function row(s) {
     const r = resultsText(s);
     if (r) bits.push(r);
     if (s.last) bits.push(`last ${dateOf(s.last)}`);
+    const fin = s.finished || [];
+    const done = fin.filter((g) => g.reviewed).length;
+    if (fin.length) bits.push(fin.length === 1 ? (done ? 'reviewed' : 'not reviewed') : `reviewed ${done} of ${fin.length}`);
     info.append(textEl('replay-meta', bits.join(' · ')));
     const other = kind === 'method' ? s.games.exploratory : s.games.method;
     if (other) info.append(textEl('replay-meta', `Also ${plural(other, kind === 'method' ? 'exploratory game' : 'method game')}`));
@@ -107,7 +110,7 @@ const RESULT = { W: 'won', L: 'lost', quit: 'forfeited', abandoned: 'left' };
 function chooseGame(li, s, question, act) {
   const actions = li.querySelector('.replay-actions');
   actions.replaceChildren(textEl('replay-confirm', question),
-    ...s.finished.map((g) => button(`${dateOf(g.t)} ${g.t ? g.t.slice(11, 16) : ''} ${RESULT[g.result] || g.result}`,
+    ...s.finished.map((g) => button(`${dateOf(g.t)} ${g.t ? g.t.slice(11, 16) : ''} ${RESULT[g.result] || g.result}${g.reviewed ? ' ✓' : ''}`,
       () => { act(g.game); li.replaceWith(row(s)); })),
     button('Cancel', () => li.replaceWith(row(s))));
 }
