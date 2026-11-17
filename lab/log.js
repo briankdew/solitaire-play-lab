@@ -12,37 +12,13 @@ function readEvents(file) {
   return fs.readFileSync(file, 'utf8').split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l));
 }
 
-/**
- * The game's actions (moves and turns of the stock) that were not undone, in order, plus the
- * ones that were (each marked `undone: true`), all in the order they were made.
- */
-function actions(events) {
-  const all = [];
-  const standing = [];
-  for (const e of events) {
-    if (e.type === 'move' || e.type === 'turn') {
-      const a = { ...e, undone: false };
-      all.push(a);
-      standing.push(a);
-    } else if (e.type === 'undo') {
-      const i = standing.map((a) => a.n).lastIndexOf(e.undoes);
-      if (i >= 0) { standing[i].undone = true; standing.splice(i, 1); }
-    }
-  }
-  return { standing, all };
-}
-
-/** The dealt position of a logged game (needs the deal event's deck and settings). */
-function dealtState(dealEvent) {
-  const order = dealEvent.deck.map((id) => ({ ...G.parseCard(id), faceUp: false }));
-  return G.dealPending(G.prepareDeck(order, dealEvent.settings));
-}
+// The shared rebuilding helpers live in lab/plays.js (the browser's Resume and Replay use them too).
+const { actions, dealtState } = P;
 
 /** Apply one play by its key ("s" or card + destination). Returns the new state, or null. */
 function applyKey(state, key) {
-  if (key === 's') return G.draw(state);
-  const m = G.legalMoves(state).find((mv) => P.moveKey(state, mv) === key);
-  return m ? G.move(state, m.from, m.to) : null;
+  const r = P.apply(state, key);
+  return r ? r.state : null;
 }
 
 /**

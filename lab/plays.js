@@ -74,5 +74,44 @@
     };
   }
 
-  return { plays, keyText, moveKey, describe };
+  /* ---------- rebuilding a logged game (Resume, Replay and lab/log.js share these) ---------- */
+
+  /** The dealt position of a logged game (its deal event's deck and settings). */
+  function dealtState(deal) {
+    const settings = G.normalizeSettings(deal.settings);
+    return G.dealPending(G.prepareDeck(deal.deck.map((id) => ({ ...G.parseCard(id), faceUp: false })), settings));
+  }
+
+  /**
+   * A game's actions (moves and turns of the stock): `standing`, the ones not undone, in order, and
+   * `all`, every one in the order made (undone ones marked `undone: true`).
+   */
+  function actions(events) {
+    const all = [];
+    const standing = [];
+    for (const e of events) {
+      if (e.type === 'move' || e.type === 'turn') {
+        const a = { ...e, undone: false };
+        all.push(a);
+        standing.push(a);
+      } else if (e.type === 'undo') {
+        const i = standing.map((a) => a.n).lastIndexOf(e.undoes);
+        if (i >= 0) { standing[i].undone = true; standing.splice(i, 1); }
+      }
+    }
+    return { standing, all };
+  }
+
+  /** Make a play by its key ("s", or card + destination): { state, token } (the record's token), or null. */
+  function apply(state, key) {
+    if (key === 's') {
+      const next = G.draw(state);
+      return next ? { state: next, token: G.turnToken(state, next) } : null;
+    }
+    const p = plays(state).find((x) => x.key === key);
+    const next = p && G.move(state, p.from, p.to);
+    return next ? { state: next, token: G.moveToken(state, p.from, p.to) } : null;
+  }
+
+  return { plays, keyText, moveKey, describe, dealtState, actions, apply };
 });

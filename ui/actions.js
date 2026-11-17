@@ -235,18 +235,21 @@ export function pauseGame() {
   render();
 }
 
+/** Deal a logged game's shuffle (its deal event's deck and settings), as Resume and Replay start. */
+export function dealFromLog(deal) {
+  S.settings = G.normalizeSettings(deal.settings);
+  prepareNewShuffle(G.prepareDeck(deal.deck.map((c) => ({ ...G.parseCard(c), faceUp: false })), S.settings));
+  S.state = G.dealPending(S.state);
+  return S.state;
+}
+
 /**
  * Resume a paused game from its log: deal its deck, then replay its actions (and undos) in order,
  * so the table, the Game Recorder, Undo and the play lab's numbering are as they were.
  * Returns false (and leaves a message) if the log doesn't replay.
  */
 export function resumeGame(id, events) {
-  const deal = events[0];
-  const settings = G.normalizeSettings(deal.settings);
-  const prepared = G.prepareDeck(deal.deck.map((c) => ({ ...G.parseCard(c), faceUp: false })), settings);
-  S.settings = settings;
-  prepareNewShuffle(prepared);
-  S.state = G.dealPending(S.state);
+  dealFromLog(events[0]);
   S.history = [];
   S.record = G.dealTokens(S.state);
   S.moves = 0;
@@ -261,16 +264,9 @@ export function resumeGame(id, events) {
       S.moves = prev.moves;
       if (S.record && prev.recLen != null) S.record.length = prev.recLen;
     } else if (e.type === 'move' || e.type === 'turn') {
-      let next; let token;
-      if (e.key === 's') {
-        next = G.draw(S.state);
-        token = next && G.turnToken(S.state, next);
-      } else {
-        const p = window.LabPlays.plays(S.state).find((x) => x.key === e.key);
-        next = p && G.move(S.state, p.from, p.to);
-        token = next && G.moveToken(S.state, p.from, p.to);
-      }
-      if (!next) { ok = false; break; }
+      const r = window.LabPlays.apply(S.state, e.key);
+      if (!r) { ok = false; break; }
+      const { state: next, token } = r;
       S.history.push({ state: S.state, moves: S.moves, recLen: S.record && S.record.length, labMark: lab.mark() });
       lab.onAction(S.state, next, token, { auto: !!e.auto, retake: !!e.retake, note: e.note });
       addToken(token);

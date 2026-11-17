@@ -6,9 +6,10 @@
 // they saw it. Nothing is recorded.
 import { G, S, say } from './shared.js';
 import { render } from './table.js';
-import { prepareNewShuffle } from './actions.js';
+import { dealFromLog } from './actions.js';
 import { syncSettingsUI } from './settings.js';
 
+const P = window.LabPlays;
 const SPEEDS = [['Slow', 2000], ['Normal', 1000], ['Fast', 400], ['Very fast', 120]];
 const CODES_URL = '/api/codes';
 
@@ -35,30 +36,12 @@ function btn(text, title, onClick, cls = 'btn small') {
 const secs = (ms) => `${((ms || 0) / 1000).toFixed(1)}s`;
 const actionText = (a) => (a.type === 'turn' ? 'draw (s)' : a.text);
 
-/** The actions still standing: an Undo takes the action it undoes out (it corrected a mistake). */
-function standing(events) {
-  const out = [];
-  for (const e of events) {
-    if (e.type === 'move' || e.type === 'turn') out.push(e);
-    else if (e.type === 'undo') {
-      const i = out.map((a) => a.n).lastIndexOf(e.undoes);
-      if (i >= 0) out.splice(i, 1);
-    }
-  }
-  return out;
-}
-
 /** Rebuild the game from its deal: one step per standing action, then the final table. */
 function buildSteps(events) {
-  const deal = events[0];
-  const settings = G.normalizeSettings(deal.settings);
-  const prepared = G.prepareDeck(deal.deck.map((c) => ({ ...G.parseCard(c), faceUp: false })), settings);
-  S.settings = settings;
+  let state = dealFromLog(events[0]);
   syncSettingsUI();   // the setup line over the table (it saves nothing)
-  prepareNewShuffle(prepared);
-  let state = G.dealPending(S.state);
   const record = G.dealTokens(state);
-  const actions = standing(events);
+  const actions = P.actions(events).standing;   // an Undo corrected a mistake: the undone action is skipped
   const answers = {};
   for (const e of events) if (e.type === 'answer') (answers[e.n] = answers[e.n] || []).push({ question: e.question, text: e.text });
   // A note added between actions ("Add now") goes with the next action.
@@ -66,16 +49,9 @@ function buildSteps(events) {
   const out = [];
   let prevN = 0;
   for (const a of actions) {
-    let next; let token;
-    if (a.key === 's') {
-      next = G.draw(state);
-      token = next && G.turnToken(state, next);
-    } else {
-      const p = window.LabPlays.plays(state).find((x) => x.key === a.key);
-      next = p && G.move(state, p.from, p.to);
-      token = next && G.moveToken(state, p.from, p.to);
-    }
-    if (!next) return null;
+    const r = P.apply(state, a.key);
+    if (!r) return null;
+    const { state: next, token } = r;
     const notes = between.filter((e) => e.after >= prevN && e.after < a.n).map((e) => e.text);
     prevN = a.n;
     if (a.note) notes.push(a.note);
