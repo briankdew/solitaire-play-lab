@@ -93,8 +93,10 @@ async function load() {
 const post = (url, body) => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
   .then((r) => r.json().then((j) => { if (!r.ok) throw new Error(j.error || r.status); return j; }));
 
-/** The file's text if it is an SVG document (checked here first; the server checks again), else null. */
+/** The file's text if it is an SVG document of 5 MB or less (checked here first; the server checks again), else null. */
+const MAX_FILE = 5 * 1024 * 1024;   // the server takes a little more, for the JSON around it
 async function svgText(f) {
+  if (f.size > MAX_FILE) return null;
   const text = await f.text();
   const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
   return doc.querySelector('parsererror') || doc.documentElement.localName !== 'svg' ? null : text;
@@ -130,7 +132,7 @@ async function importFaces() {
   await load();
   const notes = [];
   if (skipped.length) notes.push(`skipped ${skipped.length} (not a card, or a second design of one): ${skipped.slice(0, 4).join(', ')}${skipped.length > 4 ? '…' : ''}`);
-  if (failed.length) notes.push(`${failed.length} not valid SVG: ${failed.slice(0, 4).join(', ')}`);
+  if (failed.length) notes.push(`${failed.length} not valid SVG (or over 5 MB): ${failed.slice(0, 4).join(', ')}`);
   say(`Imported ${byCard.size - failed.length} card faces as "${name}".${notes.length ? ' ' + notes.join('; ') + '.' : ''}`);
 }
 
@@ -138,7 +140,7 @@ async function importBack() {
   const f = backFile.files[0];
   backFile.value = '';
   if (!f) return;
-  if (!(await svgText(f))) { say(`Could not import ${f.name}: not an SVG file.`); return; }
+  if (!(await svgText(f))) { say(`Could not import ${f.name}: not an SVG file, or over 5 MB.`); return; }
   const name = cleanName(window.prompt('Name for this card back:', cleanName(f.name.replace(/\.svg$/i, '')) || 'Back') || '');
   if (!name) return;
   try {
@@ -169,8 +171,27 @@ async function remove(kind) {
 
 faceSel.addEventListener('change', () => { remember(FACE_KEY, faceSel.value); applyFaces(faceSel.value); });
 backSel.addEventListener('change', () => { remember(BACK_KEY, backSel.value); applyBack(backSel.value); });
-el('faceArtImport').addEventListener('click', () => faceFile.click());
-el('backArtImport').addEventListener('click', () => backFile.click());
+/* ---------- before importing: what makes a file fit ---------- */
+
+const infoModal = el('artInfoModal');
+const infoCard = el('artInfoCard');
+let infoFor = null;   // the file input that Choose files… opens
+function showInfo(kind) {
+  infoFor = kind === 'face' ? faceFile : backFile;
+  el('artInfoTitle').textContent = kind === 'face' ? 'Import card faces' : 'Import a card back';
+  el('artInfoFaces').hidden = kind !== 'face';
+  el('artInfoBacks').hidden = kind === 'face';
+  infoModal.hidden = false;
+  infoCard.focus({ preventScroll: true });
+}
+function hideInfo() { infoModal.hidden = true; }
+el('artInfoChoose').addEventListener('click', () => { hideInfo(); infoFor.click(); });
+el('artInfoCancel').addEventListener('click', hideInfo);
+infoModal.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideInfo(); });
+infoModal.addEventListener('click', (e) => { if (e.target === infoModal) hideInfo(); });
+
+el('faceArtImport').addEventListener('click', () => showInfo('face'));
+el('backArtImport').addEventListener('click', () => showInfo('back'));
 el('faceArtRemove').addEventListener('click', () => remove('face'));
 el('backArtRemove').addEventListener('click', () => remove('back'));
 faceFile.addEventListener('change', importFaces);

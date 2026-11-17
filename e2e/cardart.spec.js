@@ -17,6 +17,19 @@ test('card faces and backs import from SVG files, are chosen separately, and can
   });
   expect(ids).toEqual(['AS', 'XH', 'XH', 'AS', 'JS', 'KC', 'AS', 'KS', null, null]);
 
+  // Import… first says what makes a file fit; Cancel closes it.
+  await page.locator('#faceArtImport').click();
+  await expect(page.locator('#artInfoModal')).toBeVisible();
+  await expect(page.locator('#artInfoFaces')).toContainText('File names');
+  await expect(page.locator('#artInfoFaces')).toContainText('5 wide by 7 tall');
+  await page.locator('#artInfoCancel').click();
+  await expect(page.locator('#artInfoModal')).toBeHidden();
+  await page.locator('#backArtImport').click();
+  await expect(page.locator('#artInfoBacks')).toBeVisible();
+  await expect(page.locator('#artInfoFaces')).toBeHidden();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#artInfoModal')).toBeHidden();
+
   answers.push('Test faces');
   await page.locator('#faceArtFile').setInputFiles([file('AS.svg', svg('#3a7')), file('2_of_hearts.svg', svg('#a37')), file('red_joker.svg', svg('#000'))]);
   await expect(page.locator('#status')).toContainText('Imported 2 card faces as "Test faces"');
