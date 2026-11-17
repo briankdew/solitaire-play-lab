@@ -609,7 +609,7 @@ body {
 .replay-filters input { width: 11rem; }
 .replay-card .replay-count { font-size: 0.85rem; font-weight: 400; color: #555; }
 .replay-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; border-top: 1px solid var(--card-edge); }
-.replay-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 2px; border-bottom: 1px solid var(--card-edge); }
+.replay-row { display: grid; gap: 6px; padding: 8px 2px; border-bottom: 1px solid var(--card-edge); }   /* the ID, its summary, then the buttons */
 .replay-id { font-family: 'Cousine', ui-monospace, monospace; font-size: 0.9rem; overflow-wrap: anywhere; }
 .replay-meta { font-size: 0.8rem; color: #555; }
 .replay-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--card-edge); }
@@ -619,7 +619,7 @@ body {
 }
 .replay-tab[aria-selected="true"] { color: var(--black); border-bottom-color: #bf9000; }
 .replay-tab:focus-visible { outline: 3px solid var(--brass); outline-offset: -3px; }
-.replay-actions { display: flex; gap: 6px; flex: none; }
+.replay-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .replay-confirm { font-size: 0.8rem; font-weight: 600; color: var(--red); }
 
 /* ---------- how to play ---------- */
