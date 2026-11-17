@@ -61,6 +61,7 @@ class ShuffleIndex(unittest.TestCase):
         ix2 = SH.Index(self.path)
         s = ix2.summary(ix2.get(a["id"]))
         self.assertEqual((s["plays"], s["W"], s["L"], s["last"]), (2, 1, 1, "t4"))
+        self.assertEqual([(g["game"], g["result"]) for g in s["finished"]], [("g4", "L"), ("g1", "W")])
         self.assertEqual(ix2.setups(), {"4223": 2, "4224": 1})
         self.assertEqual(ix2.counters["4223"], 2)
 

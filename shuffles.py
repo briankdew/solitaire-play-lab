@@ -187,7 +187,14 @@ class Index:
         both = {k: sum(1 for g in rec["game_ids"] if self.games[g]["kind"] == k) for k in KINDS}
         return {"id": rec["id"], "setup": rec["setup"], "n": rec["n"], "fingerprint": rec["fingerprint"],
                 "mirror": rec["mirror"], "mirror_of": self.mirror_of(rec), "first": rec["t"],
-                "games": both, **self.stats(rec, kind)}
+                "games": both, "finished": self.finished(rec, kind), **self.stats(rec, kind)}
+
+    def finished(self, rec, kind=None):
+        """The shuffle's finished games (of `kind`, or all), newest first: [{game, result, t}], for
+        Review (it copies /review <game id>)."""
+        out = [{"game": g, "result": self.games[g]["result"], "t": self.games[g]["t"]} for g in rec["game_ids"]
+               if self.games[g]["result"] and (not kind or self.games[g]["kind"] == kind)]
+        return sorted(out, key=lambda x: x["t"] or "", reverse=True)
 
     def setups(self, kind=None):
         out = {}

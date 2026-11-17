@@ -233,6 +233,30 @@ test.describe('played shuffles', () => {
     const events = await eventsOf(page, 1);
     expect(events[0]).toMatchObject({ type: 'deal', shuffle: id, first_deal: false });
   });
+
+  test('Review is off until a game of the shuffle is finished, then copies /review and the game ID', async ({ page }) => {
+    await openApp(page, { seed: 5151 });
+    await page.locator('#highestSel').selectOption('9');
+    await deal(page);
+    const id = (await page.locator('#labShuffle b').textContent()).trim();
+    const openRow = async () => {
+      await page.locator('#replayBtn').click();
+      await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+      await listReady(page);
+      return page.locator('.replay-row').filter({ hasText: id });
+    };
+    let row = await openRow();
+    await expect(row.getByRole('button', { name: 'Review' })).toBeDisabled();   // still in play
+    await page.locator('#replayClose').click();
+
+    await page.locator('#endGameBtn').click();
+    const events = await eventsOf(page, 2);
+    expect(events[events.length - 1]).toMatchObject({ type: 'end', result: 'L' });
+    row = await openRow();
+    await row.getByRole('button', { name: 'Review' }).click();
+    await expect(page.locator('#replayCount')).toContainText(/\/review 9\S+/);
+    await page.locator('#replayClose').click();
+  });
 });
 
 test.describe('exploratory games and deleting', () => {

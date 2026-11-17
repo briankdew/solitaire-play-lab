@@ -4,7 +4,8 @@
 //   Paused        games stopped with Pause game, to be resumed
 //   Deleted       deleted shuffles, which can be restored
 // Each row has the shuffle ID, how often it was played and how those games ended, and buttons to
-// replay or delete it (or restore it). Shows no cards: a deck order is fetched only to replay it.
+// replay, review or delete it (or restore it). Shows no cards: a deck order is fetched only to replay it.
+// Review copies `/review <game id>` to paste into Claude Code (a browser can't start a session).
 import { G, S, inPlay, say } from './shared.js';
 import { confirmReshuffle, dealShuffle, prepareNewShuffle, resumeGame } from './actions.js';
 import { applySettings } from './settings.js';
@@ -88,13 +89,38 @@ function row(s) {
     if (s.mirror_of && s.mirror_of.length) info.append(textEl('replay-meta', `Mirror of ${s.mirror_of.join(', ')}`));
     const del = button('Delete', () => askDelete(li, s));
     if (shuffleInPlay() === s.id) { del.disabled = true; del.title = 'This shuffle is being played'; }
-    actions.append(button('Replay', () => replay(s.id)), del);
+    const games = s.finished || [];
+    const rev = button('Review', () => (games.length === 1 ? copyReview(games[0].game) : chooseReview(li, s)));
+    if (!games.length) { rev.disabled = true; rev.title = 'No finished game to review yet'; }
+    actions.append(button('Replay', () => replay(s.id)), rev, del);
   }
   li.append(info, actions);
   return li;
 }
 
 /** Deleting asks first, in the row: the shuffle and every game of it, of both kinds. */
+const RESULT = { W: 'won', L: 'lost', quit: 'forfeited', abandoned: 'left' };
+
+/** A shuffle played more than once: pick which game to review, newest first. */
+function chooseReview(li, s) {
+  const actions = li.querySelector('.replay-actions');
+  actions.replaceChildren(textEl('replay-confirm', 'Review which game?'),
+    ...s.finished.map((g) => button(`${dateOf(g.t)} ${g.t ? g.t.slice(11, 16) : ''} ${RESULT[g.result] || g.result}`,
+      () => { copyReview(g.game); li.replaceWith(row(s)); })),
+    button('Cancel', () => li.replaceWith(row(s))));
+}
+
+/** Copy `/review <game id>` for Claude Code; if the clipboard is unavailable, show it to copy by hand. */
+async function copyReview(game) {
+  const cmd = `/review ${game}`;
+  try {
+    await navigator.clipboard.writeText(cmd);
+    countEl.textContent = `Copied ${cmd}: paste it into Claude Code.`;
+  } catch {
+    countEl.textContent = `Copy this into Claude Code: ${cmd}`;
+  }
+}
+
 function askDelete(li, s) {
   const games = s.games.method + s.games.exploratory;
   const actions = li.querySelector('.replay-actions');
