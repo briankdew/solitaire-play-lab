@@ -308,7 +308,7 @@ test.describe('played shuffles', () => {
     await expect(tab.locator('.study-now')).toContainText('Lost');
     await tab.locator('.study-list li').first().click();
     await expect(tab.locator('.study-now')).toContainText('#2 draw (s)');
-    await tab.close();
+    await Promise.all([tab.waitForEvent('close'), tab.getByRole('button', { name: 'Close the replay' }).click()]);
     expect(readEvents(await gameFile(page)).length).toBe(logged);   // nothing recorded
     await page.locator('#replayClose').click();
   });

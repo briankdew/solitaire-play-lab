@@ -95,6 +95,12 @@ function buildPanel(game, deal) {
   }
   speed.addEventListener('change', () => { if (timer) { stop(); toggle(); } });
   bar.append(first, back, play, fwd, last, speed);
+  // Back to the play page: close this tab (Replay opens in one); opened some other way, go to the page.
+  const done = btn('Close replay', 'Close the replay and go back to the play page', () => {
+    stop();
+    window.close();
+    setTimeout(() => { location.href = location.pathname; }, 300);   // only if the tab couldn't close
+  }, 'btn small study-close');
   const count = h('p', 'study-count');
   const now = h('div', 'study-now');
   now.setAttribute('aria-live', 'polite');
@@ -133,7 +139,7 @@ function buildPanel(game, deal) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendAnswer(); }
   });
   speech(mic, answer);
-  box.append(title, sub, bar, count, qBox, now, list);
+  box.append(title, sub, done, bar, count, qBox, now, list);
   left.prepend(box);
   return { first, back, play, fwd, last, speed, count, now, list, qBox, qHead, qText, answer };
 }

@@ -669,3 +669,4 @@ body.studying .side-right .controls { display: none; }
 .study-mark { color: var(--brass); }
 .study-question > .btn { justify-self: start; }
 .study-list li.asked .study-n { color: #ffffff; background: var(--brass); border-radius: 4px; padding: 0 4px; }   /* the action Claude asks about */
+.study-close { justify-self: start; }
