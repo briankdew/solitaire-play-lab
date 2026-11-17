@@ -7,7 +7,7 @@
 Clear cases (method games, no note), coded with --source inferred:
   - a draw with no new play                       -> NNP
   - an ace home                                   -> direct_home, foundation_set
-  - a two home, or any play home that was the only new play -> direct_home
+  - any other play home                           -> direct_home
   - a king to an empty column, the only new play  -> king_column, kings_out
   - any other only new play, and the player made it -> ONP
 Extra nuance (most_hidden, setup_play, ...) is left for /review.
@@ -45,7 +45,7 @@ def clear_codes(e):
     card, dest = key[:2], key[2:]
     if dest == "h" and card[0] == "A":
         return ["direct_home", "foundation_set"], "Ace straight home."
-    if dest == "h" and (card[0] == "2" or new == [key]):
+    if dest == "h":   # every home play with no note has been coded direct_home (checked 2026-11-17)
         return ["direct_home"], f"{text} straight home."
     if new == [key]:
         if card[0] == "K" and (L.play_identity(e.get("view"), key) or ("", ""))[1].startswith("empty"):
