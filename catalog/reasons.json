@@ -182,10 +182,22 @@
     {
       "code": "tableau_first",
       "name": "Tableau and home first",
-      "definition": "I try to always maximize tableau and home plays before considering waste plays.",
+      "definition": "I try to always maximize tableau and home plays before considering waste plays. tableau_first describes the plays from a tableau column to a tableau column, or from a tableau column to a home pile, made to exhaust as many tableau plays as possible before turning the stock. A waste play that was waiting while the tableau plays were made is not tableau_first: it is pending_waste.",
       "factors": [],
       "status": "adopted",
-      "source": "proposed in play, 2026-11-16"
+      "source": "proposed in play, 2026-11-16",
+      "history": [
+        {
+          "name": "Tableau and home first",
+          "definition": "I try to always maximize tableau and home plays before considering waste plays.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Tableau and home first",
+          "definition": "I try to always maximize tableau and home plays before considering waste plays. tableau_first describes the plays from a tableau column to a tableau column, or from a tableau column to a home pile, made to exhaust as many tableau plays as possible before turning the stock. A waste play made once the tableau plays are exhausted is not tableau_first: it is the only new play available after all tableau play (ONP).",
+          "until": "2026-11-16"
+        }
+      ]
     },
     {
       "code": "auto_first",
@@ -307,6 +319,38 @@
       "code": "dead_end",
       "name": "Dead end",
       "definition": "No pending progressive plays on the tableau or to/from the foundation, and a new full stock turn completed with no new plays becoming available: I select End game.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "setup_play",
+      "name": "Setup play",
+      "definition": "A play that isn't a new play itself, but a setup for a more potentially advantageous play to follow: e.g. 7♠b opens column a for the K♠, moving toward Kings out! and unlocking the potential of five hidden cards. The play being set up may come more than one play after the setup play: don't expect it to happen immediately afterwards.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "pending_waste",
+      "name": "Pending waste play",
+      "definition": "A play that was available on the waste pile, but pending until the tableau_first plays were exhausted; then it is made. It isn't a new play: it was waiting. E.g. 2♦b, available since the 3♠ became its target, played once the tableau plays were done.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "in_the_hole",
+      "name": "Known play in the hole",
+      "definition": "A play I hold in reserve (e.g. 4♥h), as long as play is moving, like having a \"known play\" in the hole to use when no other more advantageous plays are available. At some point it gets into gut-feel territory. In some ways it's the inverse of tableau_first, but less well defined.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "hedge_play",
+      "name": "Hedge play",
+      "definition": "The more advantageous play that also hedges against an unfortunate card sequence: e.g. playing 9♠h to preserve the waste_offset in case of an unfortunate sequence in the last three waste cards, given the high potential to win based on the current game state.",
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-16"
