@@ -255,8 +255,9 @@ def is_exploratory(events):
 
 
 def decisions(events, include_undone=False):
-    """The player's decisions in a game: standing (or all) actions that were not automatic and had
-    a real choice (2 or more plays)."""
+    """The player's decisions in a game: standing (or all) actions with a real choice (2 or more plays).
+    Auto-complete's moves count too: it is only a time saver for plays the player would make
+    (every card straight home: direct_home)."""
     standing, all_actions = standing_actions(events)
     chosen = all_actions if include_undone else standing
-    return [a for a in chosen if not a.get("auto") and len(a.get("plays") or []) >= 2]
+    return [a for a in chosen if len(a.get("plays") or []) >= 2]

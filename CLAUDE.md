@@ -29,7 +29,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
   - the player had a real choice (2 or more plays) and gave no note,
   - a note uses a term that isn't in `catalog/reasons.json`,
   - two notes contradict each other.
-- **Don't ask when:** only one play was possible, or the note already explains the play.
+- **Don't ask when:** only one play was possible, the note already explains the play, or the play was Auto-complete's (it counts as a play and a decision, coded `direct_home`: Auto-complete is only a time saver).
 - **Plays with no note (from 2026-11-16):** the player leaves out the note when they think existing codes already cover the play. Code it from the existing codes (`--source inferred`) and don't ask. Ask in the app only when no code seems to cover it, or it looks like a new edge case of one.
 - **Draws with no note:** when there was no new play (see `NNP`: moving a run is a useful play only if the card it frees is immediately playable), assume NNP: code it `NNP` (`--source inferred`) and don't ask. If a new play appears to have been missed, say so in one line (the player asked for this; visible cards only).
 - **One question at a time, under 15 words,** about one action (`--n`). Plain words, the player's notation (`A♠h`, `4♥a`, `s`).

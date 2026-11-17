@@ -4,8 +4,9 @@
     python3 tools/report.py                     # every finished game: totals and reason counts
     python3 tools/report.py --game ID --plays   # one game, play by play (for /review)
 
-A decision is a play the player chose (not the automatic finish) when there were 2 or more plays.
-A decision is explained when it has a note, an answer to a question, or a coded reason.
+A decision is a play made when there were 2 or more plays, Auto-complete's included (it only saves time).
+A decision is explained when it has a note, an answer to a question, or a coded reason; an Auto-complete
+move counts as direct_home (every card it plays goes straight home).
 Exploratory games are counted apart and kept out of the totals. Nothing here judges a play.
 """
 import argparse
@@ -55,8 +56,10 @@ def overall():
         more = extras(events)
         for d in L.decisions(events):
             total += 1
-            if d.get("note") or more.get(d["n"]) or ann.get((g, d["n"])):
+            if d.get("note") or more.get(d["n"]) or ann.get((g, d["n"])) or d.get("auto"):
                 explained += 1
+            if d.get("auto") and not ann.get((g, d["n"])):
+                codes["direct_home"] += 1   # Auto-complete: straight home
         undone += sum(1 for e in events if e.get("type") == "undo")
     standing = {g: {a["n"] for a in L.standing_actions(L.read_lines(L.game_path(g)))[0]} for g in games}
     for (g, n), items in ann.items():
@@ -65,7 +68,7 @@ def overall():
                 codes.update(a.get("codes", []))
     print(f"{len(games)} finished method games: " + ", ".join(f"{k} {v}" for k, v in results.items())
           + f"  ({exploratory} exploratory games not counted)")
-    print(f"{total} decisions (2+ plays, not automatic), {explained} explained, {undone} undos")
+    print(f"{total} decisions (2+ plays, Auto-complete included), {explained} explained, {undone} undos")
     if codes:
         print("\nReasons used:")
         for code, n in codes.most_common():
@@ -100,7 +103,7 @@ def one_game(game):
             print(f"   coded{' (not counted: undone)' if a['undone'] else ''} {', '.join(x['codes'])} ({x['source']}): {x.get('summary') or ''}")
         if a.get("revealed"):
             print(f"   revealed {L.card_text(a['revealed'])}")
-    gaps = [a for a in L.decisions(events) if not a.get("note") and not more.get(a["n"]) and not ann.get((game, a["n"]))]
+    gaps = [a for a in L.decisions(events) if not a.get("auto") and not a.get("note") and not more.get(a["n"]) and not ann.get((game, a["n"]))]
     print(f"\nDecisions with no note, answer or code: {', '.join('#%d %s' % (a['n'], a['text']) for a in gaps) or 'none'}")
 
 
