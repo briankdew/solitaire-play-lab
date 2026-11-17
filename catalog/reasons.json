@@ -292,7 +292,7 @@
     {
       "code": "direct_home",
       "name": "Direct home",
-      "definition": "A card plays directly to the home pile whenever there is no advantage in not playing it, and NOT playing it could lead to a disadvantage (regressive play): e.g. Exception: when the next card of the suit isn't available to play (e.g. the 4♦, which could potentially lead to the 5♦ and 6♦ being played to the foundation), leaving the last card on the waste unplayed can give the possible advantage of a waste_offset, overriding the direct_home play. with A♠, 2♥, A♣ and 2♦ home, I expect 2♠, 3♥, 2♣ and 3♦ to play directly home. An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed. Likewise, since 2♥ and AT LEAST 2♦ have been played to home, playing 3♠ to home (on 2♠) is automatic: there is no progressive-play reason not to play it.",
+      "definition": "A card plays directly to the home pile whenever there is no advantage in not playing it, and NOT playing it could lead to a disadvantage (regressive play): e.g. Exception: when the next card of the suit isn't available to play (e.g. the 4♦, which could potentially lead to the 5♦ and 6♦ being played to the foundation), leaving the last card on the waste unplayed can give the possible advantage of a waste_offset, overriding the direct_home play. with A♠, 2♥, A♣ and 2♦ home, I expect 2♠, 3♥, 2♣ and 3♦ to play directly home. An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed. Likewise, since 2♥ and AT LEAST 2♦ have been played to home, playing 3♠ to home (on 2♠) is automatic: there is no progressive-play reason not to play it. It isn't always urgent: when a direct_home play (e.g. 2♦h) has no immediate consequences, putting it off for one move to focus on a setup (e.g. setting up K♣c) has no detrimental effect.",
       "factors": [],
       "status": "adopted",
       "source": "broadened from ace_home, 2026-11-16",
@@ -322,6 +322,11 @@
           "name": "Direct home",
           "definition": "A card plays directly to the home pile whenever there is no advantage in not playing it, and NOT playing it could lead to a disadvantage (regressive play): e.g. with A♠, 2♥, A♣ and 2♦ home, I expect 2♠, 3♥, 2♣ and 3♦ to play directly home. An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed. Likewise, since 2♥ and AT LEAST 2♦ have been played to home, playing 3♠ to home (on 2♠) is automatic: there is no progressive-play reason not to play it.",
           "until": "2026-11-16"
+        },
+        {
+          "name": "Direct home",
+          "definition": "A card plays directly to the home pile whenever there is no advantage in not playing it, and NOT playing it could lead to a disadvantage (regressive play): e.g. Exception: when the next card of the suit isn't available to play (e.g. the 4♦, which could potentially lead to the 5♦ and 6♦ being played to the foundation), leaving the last card on the waste unplayed can give the possible advantage of a waste_offset, overriding the direct_home play. with A♠, 2♥, A♣ and 2♦ home, I expect 2♠, 3♥, 2♣ and 3♦ to play directly home. An ace always goes straight to home since not playing it has the most downside (covering a face-down card, blocking a column from accepting a high card, preventing the next card in the home pile from being played, etc.). Moving an ace to home has only upside consequences. When more than one ace can go home, both aces will be played before any other play, so the order in which they're played is of no material consequence. When the ace of a suit is on the foundation and the two becomes playable, it is an automatic play because there is absolutely no progressive play value to leaving it unplayed. Likewise, since 2♥ and AT LEAST 2♦ have been played to home, playing 3♠ to home (on 2♠) is automatic: there is no progressive-play reason not to play it.",
+          "until": "2026-11-17"
         }
       ]
     },
@@ -386,6 +391,14 @@
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-16"
+    },
+    {
+      "code": "complex_first",
+      "name": "Complex plays first",
+      "definition": "When multiple plays are available, as long as not making one of the plays has no immediate detrimental effects if it remains unplayed, it's okay to leave it unplayed as long as not playing it is a \"neutral\" decision. I can't make two plays simultaneously, and I often focus on the more \"complex\" moves first: e.g. 4♥f to offset the waste pile before I forgot, while 3♠h waited a move.",
+      "factors": [],
+      "status": "adopted",
+      "source": "proposed in play, 2026-11-17"
     }
   ]
 }

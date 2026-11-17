@@ -61,7 +61,7 @@ The player has played about 50,000 games by hand and leads the research. Follow 
 | `catalog/annotations.jsonl` | Claude's reading of each explained play. |
 | `catalog/reviews/` | One summary per reviewed game. |
 | `BACKLOG.md` | Items the player has raised for later, kept until they're done or dropped. |
-| `tools/` | `watch.py`, `ask.py`, `annotate.py` (live), `report.py` (what the games hold). watch.py tags each play with what it does (`[w]`, `[reveals]`, `[empties d]`, `[frees 8♣: no play]`) and lists the new plays under the player's definition (in `ONP` / `NNP`) (`new: none (NNP)`): freshly available since the previous position, judged by the cards (not the columns), and useful. |
+| `tools/` | `watch.py`, `autocode.py` (codes the clear-cut actions and prints the rest, for `/play`; `--check` compares it with a finished game's codes), `ask.py`, `annotate.py` (live), `report.py` (what the games hold). watch.py tags each play with what it does (`[w]`, `[reveals]`, `[empties d]`, `[frees 8♣: no play]`) and lists the new plays under the player's definition (in `ONP` / `NNP`) (`new: none (NNP)`): freshly available since the previous position, judged by the cards (not the columns), and useful. |
 
 ## Tests
 - `npm test`: rule and lab tests (Node 18+), then the shuffle-index tests (Python).
