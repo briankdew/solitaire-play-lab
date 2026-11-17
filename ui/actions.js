@@ -16,6 +16,7 @@ export function prepareNewShuffle(prepared) {
   syncShufflePicker();
   S.history = [];
   S.record = [];
+  S.undoneSeq = [];   // the last game's undone lines go with its record
   S.moves = 0;
   S.suppressAuto = false;
   S.closed = false;

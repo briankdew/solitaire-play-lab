@@ -121,6 +121,9 @@ test.describe('play', () => {
     await card(page, 'AS').click();
     await expect.poll(() => seqLines(page)).toEqual(['000', '001 undone', '002']);
     await expect.poll(() => recordText(page)).toBe('D A♠ a A♥ b 2♥ w 1 A♠ h -- a');
+    await page.locator('#newBtn').click();   // a new shuffle: an empty record, no lines left from the last game
+    if (await page.locator('#confirmContinue').isVisible()) await page.locator('#confirmContinue').click();
+    await expect.poll(() => seqLines(page)).toEqual([]);
   });
 
   test('turning the stock adds an unnumbered step; Undo reads Undo draw', async ({ page }) => {
