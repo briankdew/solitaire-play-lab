@@ -10,7 +10,12 @@ Review a finished game: $ARGUMENTS
 4. **Find the gaps:**
    - real choices with no note or annotation,
    - notes not yet coded.
-   Take them with the player one at a time, as short questions, in game order. Annotate each answer (`tools/annotate.py --source answer`). Mark it `--source inferred --confidence low` only when the player says your reading is right.
+   Code what the position and the existing codes already explain yourself (`--source inferred`, with a confidence); ask only about the rest.
+   **Ask in Replay, one at a time, in game order:** the player answers with the game in front of them.
+   - Tell the player once: open Played shuffle → Replay for this game (or `http://localhost:8000/?replay=ID`), restarting the server first if it predates Replay.
+   - Ask with `python3 tools/ask.py --review --game ID --n N --play "4♥g" "Short question?"`. Replay jumps to that action, shows the question and takes the answer; the player can step anywhere to rebuild their thinking.
+   - Then run `python3 tools/ask.py --wait` in the background (Bash `run_in_background`): it ends with the answer. An answer typed in the terminal instead: record it with `tools/ask.py --answer "..."`.
+   - Annotate each answer (`tools/annotate.py --source answer`). Mark it `--source inferred --confidence low` only when the player says your reading is right.
 5. **Patterns:** if the player's words keep describing the same idea, suggest a code for it or a sharper definition of an existing one, in their words. Change `catalog/reasons.json` only when the player agrees. Don't suggest values or weights unless the player asks.
 6. **Write the summary:** save `catalog/reviews/<game-id>.md` with:
    - the result,

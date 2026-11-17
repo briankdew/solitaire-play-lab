@@ -5,6 +5,12 @@
     python3 tools/ask.py --status                                    # the open question, if any
     python3 tools/ask.py --answer "Because ..."                      # an answer given in the terminal
     python3 tools/ask.py --clear                                     # withdraw the open question
+    python3 tools/ask.py --review --game ID --n 51 --play s "Why draw here?"   # /review: shows in Replay
+    python3 tools/ask.py --wait                                      # wait for the answer, then print it
+
+A --review question shows in the Replay of that finished game (Played shuffle -> Replay), which jumps
+to the action; the play page ignores it. --wait (run in the background) ends when the question is
+answered or withdrawn.
 
 One question at a time: asking while one is open fails unless --replace is given.
 """
@@ -32,9 +38,24 @@ def main():
     p.add_argument("--status", action="store_true")
     p.add_argument("--answer", help="record an answer given in the terminal")
     p.add_argument("--clear", action="store_true")
+    p.add_argument("--review", action="store_true", help="a /review question, shown in the game's Replay")
+    p.add_argument("--wait", action="store_true", help="wait until the open question is answered or withdrawn")
     a = p.parse_args()
 
     q = open_question()
+    if a.wait:
+        if not q:
+            sys.exit("No open question.")
+        while True:
+            time.sleep(1)
+            cur = L.read_json(L.QUESTION, {}) or {}
+            if cur.get("id") != q["id"] or cur.get("withdrawn"):
+                print("Withdrawn or replaced.")
+                return
+            if cur.get("answered"):
+                ans = [x for x in L.read_lines(L.ANSWERS) if x.get("question_id") == q["id"]]
+                print(f"ANSWER (#{q.get('n')}, via {ans[-1].get('via') if ans else '?'}): {ans[-1]['text'] if ans else ''}")
+                return
     if a.status:
         print(f"Open: {q['id']} (#{q.get('n')}): {q['text']}" if q else "No open question.")
         return
@@ -63,8 +84,11 @@ def main():
     words = len(a.text.split())
     game = a.game or L.current_game()
     q = {"id": f"q{int(time.time())}", "game": game, "n": a.n, "play": a.play, "text": a.text.strip(), "asked": L.now()}
+    if a.review:
+        q["review"] = True
     L.write_json(L.QUESTION, q)
-    print(f"Asked {q['id']}" + (f" ({words} words: keep it under 15)" if words >= 15 else ""))
+    print(f"Asked {q['id']}" + (f" ({words} words: keep it under 15)" if words >= 15 else "")
+          + (f" in Replay (Played shuffle -> Replay, or /?replay={game})" if a.review else ""))
 
 
 if __name__ == "__main__":

@@ -8,10 +8,12 @@ import { G, S, say } from './shared.js';
 import { render } from './table.js';
 import { dealFromLog } from './actions.js';
 import { syncSettingsUI } from './settings.js';
+import { speech } from './lab.js';
 
 const P = window.LabPlays;
 const SPEEDS = [['Slow', 2000], ['Normal', 1000], ['Fast', 400], ['Very fast', 120]];
 const CODES_URL = '/api/codes';
+const QUESTION_POLL_MS = 1500;
 
 let steps = [];     // { state, record, action (null on the last step), notes: [text], answers: [{question, text}] }
 let cur = 0;
@@ -19,6 +21,8 @@ let timer = null;
 let names = {};     // code -> name, for the chips' tooltips
 let codes = {};     // action n -> [codes]
 let ui = null;
+let question = null;   // the open /review question about this game ({ id, n, text }), or null
+let game = null;
 
 function h(tag, cls, text) {
   const e = document.createElement(tag);
@@ -99,9 +103,39 @@ function buildPanel(game, deal) {
     const li = e.target.closest('li');
     if (li) { stop(); go(Number(li.dataset.i)); }
   });
-  box.append(title, sub, bar, count, now, list);
+  // A /review question (tools/ask.py --review): the replay jumps to its action and the answer goes back to Claude.
+  const qBox = h('div', 'lab-question study-question');
+  qBox.hidden = true;
+  const qHead = h('p', 'lab-q-head');
+  const qText = h('p', 'lab-q-text');
+  const answer = h('textarea');
+  answer.rows = 3;
+  answer.placeholder = 'Your answer';
+  answer.setAttribute('aria-label', 'Your answer');
+  const suits = h('span', 'lab-suits');
+  for (const [sym, red] of [['♠', false], ['♥', true], ['♣', false], ['♦', true]]) {
+    const b = h('button', red ? 'r' : null, sym);
+    b.type = 'button';
+    b.setAttribute('aria-label', `Insert ${sym}`);
+    b.addEventListener('mousedown', (e) => e.preventDefault());
+    b.addEventListener('click', () => { answer.setRangeText(sym, answer.selectionStart, answer.selectionEnd, 'end'); answer.focus(); });
+    suits.append(b);
+  }
+  const mic = btn('Speak', null, () => {});
+  const send = btn('Send answer', null, sendAnswer);
+  const back2 = btn('Go to the question', null, () => { stop(); goToQuestion(); });
+  const pair = h('span', 'lab-pair');
+  pair.append(mic, send);
+  const row = h('div', 'lab-row');
+  row.append(suits, pair);
+  qBox.append(qHead, qText, answer, row, back2);
+  answer.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendAnswer(); }
+  });
+  speech(mic, answer);
+  box.append(title, sub, bar, count, qBox, now, list);
   left.prepend(box);
-  return { first, back, play, fwd, last, speed, count, now, list };
+  return { first, back, play, fwd, last, speed, count, now, list, qBox, qHead, qText, answer };
 }
 
 function chips(list) {
@@ -178,7 +212,11 @@ function go(i) {
   ui.fwd.disabled = ui.last.disabled = cur === n;
   if (!timer) ui.play.disabled = cur === n;
   showNow(st);
-  for (const li of ui.list.children) li.classList.toggle('cur', Number(li.dataset.i) === cur);
+  for (const li of ui.list.children) {
+    li.classList.toggle('cur', Number(li.dataset.i) === cur);
+    const st2 = steps[Number(li.dataset.i)];
+    li.classList.toggle('asked', !!question && !!st2.action && st2.action.n === question.n);
+  }
   const li = ui.list.children[cur];
   if (li) ui.list.scrollTop = Math.max(0, li.offsetTop - ui.list.offsetTop - ui.list.clientHeight / 2);
 }
@@ -204,8 +242,53 @@ document.addEventListener('keydown', (e) => {
   if (keys[e.key]) { e.preventDefault(); stop(); keys[e.key](); } else if (e.key === ' ' && !e.target.closest('button')) { e.preventDefault(); toggle(); }
 });
 
+/* ---------- /review questions ---------- */
+
+const stepOf = (n) => steps.findIndex((st) => st.action && st.action.n === n);
+function goToQuestion() { if (question) { const i = stepOf(question.n); if (i >= 0) go(i); } }
+
+function showQuestion(q) {
+  question = q;
+  ui.qBox.hidden = !q;
+  if (q) {
+    const st = steps[stepOf(q.n)];
+    ui.qHead.textContent = `Claude asks about #${q.n}${st ? ` (${actionText(st.action)})` : ''}`;
+    ui.qText.textContent = q.text;
+    stop();
+    goToQuestion();
+  } else {
+    go(cur);
+  }
+}
+
+async function pollQuestion() {
+  try {
+    const r = await fetch('/api/question', { cache: 'no-store' });
+    const q = r.ok ? await r.json() : {};
+    const mine = q.id && q.review && q.game === game ? q : null;
+    if ((mine ? mine.id : null) !== (question ? question.id : null)) showQuestion(mine);
+  } catch { /* the server may be restarting */ }
+}
+
+async function sendAnswer() {
+  const text = ui.answer.value.trim();
+  if (!text || !question) return;
+  try {
+    const r = await fetch('/api/answer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: question.id, text }) });
+    if (!r.ok) throw new Error(r.status);
+    const st = steps[stepOf(question.n)];
+    if (st) st.answers.push({ question: question.text, text });
+    ui.answer.value = '';
+    showQuestion(null);
+    say('Answer sent to Claude.');
+  } catch {
+    say('Could not send the answer: is ./play still running?');
+  }
+}
+
 /** Open the replay of a finished game. */
-export async function startStudy(game) {
+export async function startStudy(id) {
+  game = id;
   document.body.classList.add('studying');
   document.title = `Replay ${game} · Play Lab`;
   let data;
@@ -228,4 +311,6 @@ export async function startStudy(game) {
   fillList();
   say('Replay: nothing here is recorded. ← → step, Space plays.');
   go(0);
+  setInterval(pollQuestion, QUESTION_POLL_MS);
+  pollQuestion();
 }

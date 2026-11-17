@@ -550,13 +550,13 @@ body {
 .lab.off .lab-status { color: var(--ink-muted); font-weight: 400; }
 .lab-label { font-size: 0.85rem; color: var(--ink); }
 .lab-label span { display: block; font-size: 0.75rem; color: var(--ink-muted); }
-.lab textarea {
+.lab textarea, .study textarea {
   width: 100%; resize: vertical; font: 0.85rem/1.4 var(--font-ui); color: var(--ink);   /* the size of "Why this play?" */
   background: color-mix(in srgb, var(--felt-deep) 70%, transparent);
   border: 1px solid var(--slot); border-radius: 6px; padding: 6px 8px;
 }
-.lab textarea::placeholder { color: var(--ink-muted); }
-.lab textarea:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
+.lab textarea::placeholder, .study textarea::placeholder { color: var(--ink-muted); }
+.lab textarea:focus-visible, .study textarea:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
 /* Two-button rows: both buttons as wide as the wider one, at the right. */
 .lab-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .lab-pair { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; margin-left: auto; }
@@ -667,3 +667,5 @@ body.studying .side-right .controls { display: none; }
 .study-n { min-width: 2.6em; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
 .study-act { min-width: 4.5em; }
 .study-mark { color: var(--brass); }
+.study-question > .btn { justify-self: start; }
+.study-list li.asked .study-n { color: #ffffff; background: var(--brass); border-radius: 4px; padding: 0 4px; }   /* the action Claude asks about */

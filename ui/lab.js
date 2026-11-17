@@ -365,7 +365,8 @@ function showQuestion(q) {
 async function pollQuestion() {
   try {
     const r = await fetch('/api/question', { cache: 'no-store' });
-    const q = r.ok ? await r.json() : {};
+    let q = r.ok ? await r.json() : {};
+    if (q.review) q = {};   // a /review question shows in Replay, not here
     if ((q.id || null) !== (question ? question.id : null)) showQuestion(q);
     if (!recording) setStatus(true);
   } catch {
@@ -377,8 +378,8 @@ async function pollQuestion() {
 
 const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-/** A Speak button that dictates into a text box (Chrome's speech recognition). */
-function speech(button, box) {
+/** A Speak button that dictates into a text box (Chrome's speech recognition). Replay uses it too. */
+export function speech(button, box) {
   if (!Recognition) { button.hidden = true; return; }
   let rec = null;
   let base = '';

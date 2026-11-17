@@ -124,6 +124,22 @@ test.describe('think aloud', () => {
     expect(events.find((e) => e.type === 'move')).toMatchObject({ key: 'ASh', note: 'Open column a to make room' });
   });
 
+  test('Ctrl+Z in a note box edits the note and leaves the game alone', async ({ page }) => {
+    await openApp(page);
+    await pickShuffle(page, SCREENSHOT_DEAL);
+    await deal(page);
+    await card(page, 'AS').click();
+    await settle(page);
+    await page.locator('#labNote').fill('typo');
+    await page.locator('#labNote').press('Control+z');
+    await expect(page.locator('#labNote')).toHaveValue('');
+    await expect(page.locator('#undoBtn')).toBeEnabled();   // the move A♠h still stands
+    expect(await recordText(page)).toContain('h');
+  });
+});
+
+// The tests that write live/question.json run one after the other (there is one question channel).
+test.describe.serial('Claude\'s questions', () => {
   test('undo, a turn of the stock, a reveal and a win are recorded, and the log replays to the win', async ({ page }) => {
     await openApp(page);
     await pickShuffle(page, SCREENSHOT_DEAL);
@@ -187,17 +203,46 @@ test.describe('think aloud', () => {
     expect(logged[0]).toMatchObject({ question_id: id, text: 'It costs nothing and opens a column.' });
   });
 
-  test('Ctrl+Z in a note box edits the note and leaves the game alone', async ({ page }) => {
-    await openApp(page);
-    await pickShuffle(page, SCREENSHOT_DEAL);
+  test('a /review question shows in that game\'s Replay (not the play page), jumps to its action and takes the answer', async ({ page }) => {
+    await openApp(page, { seed: 7171 });
+    await page.locator('#highestSel').selectOption('9');
     await deal(page);
-    await card(page, 'AS').click();
+    const id = (await page.locator('#labShuffle b').textContent()).trim();
+    await stock(page).click();
     await settle(page);
-    await page.locator('#labNote').fill('typo');
-    await page.locator('#labNote').press('Control+z');
-    await expect(page.locator('#labNote')).toHaveValue('');
-    await expect(page.locator('#undoBtn')).toBeEnabled();   // the move A♠h still stands
-    expect(await recordText(page)).toContain('h');
+    await stock(page).click();
+    await settle(page);
+    await page.locator('#endGameBtn').click();
+    await eventsOf(page, 4);
+    const game = await page.locator('#lab').getAttribute('data-game');
+    const live = path.join(DATA, 'live');
+    fs.writeFileSync(path.join(live, 'question.json'), JSON.stringify({ id: 'qr1', game, n: 2, play: 's', text: 'Why draw again?', review: true }));
+    await page.waitForTimeout(3000);   // the play page polls every 2.5s: it ignores a /review question
+    await expect(page.locator('#labQuestion')).toBeHidden();
+
+    await page.locator('#replayBtn').click();
+    await page.locator('#replaySearch').fill(String(Number(id.split('-')[1])));
+    await listReady(page);
+    const row = page.locator('.replay-row').filter({ hasText: id });
+    const [tab] = await Promise.all([page.context().waitForEvent('page'), row.getByRole('button', { name: 'Replay' }).click()]);
+    const q = tab.locator('.study-question');
+    await expect(q).toBeVisible();
+    await expect(q).toContainText('Why draw again?');
+    await expect(tab.locator('.study-now')).toContainText('#2 draw (s)');   // jumped to the action
+    await expect(tab.locator('.study-list li.asked')).toHaveCount(1);
+    await tab.keyboard.press('Home');
+    await expect(tab.locator('.study-now')).toContainText('#1 draw (s)');
+    await q.getByRole('button', { name: 'Go to the question' }).click();
+    await expect(tab.locator('.study-now')).toContainText('#2 draw (s)');
+    await q.locator('textarea').fill('Still nothing to play');
+    await q.getByRole('button', { name: 'Send answer' }).click();
+    await expect(q).toBeHidden();
+    await expect(tab.locator('.study-now')).toContainText('Still nothing to play');
+    expect(JSON.parse(fs.readFileSync(path.join(live, 'question.json'), 'utf8')).answered).toBeTruthy();
+    const answer = readEvents(await gameFile(page)).find((e) => e.type === 'answer');
+    expect(answer).toMatchObject({ n: 2, text: 'Still nothing to play' });
+    await tab.close();
+    await page.locator('#replayClose').click();
   });
 });
 
