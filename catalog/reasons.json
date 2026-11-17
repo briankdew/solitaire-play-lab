@@ -4,7 +4,7 @@
     {
       "code": "most_hidden",
       "name": "Uncover the most hidden",
-      "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards. The overarching strategy is to uncover the card on the columns that has the most potential to reveal more cards to be played. Tie-break: when two cards are available to play with the same number of face-down cards above them, playing either gives the same prospect, so I select the column that has been \"least productive\" relative to its initial potential productivity (the face-down cards it started with). This simplifies to \"the playable card on the left-most column with the same (highest) number of face-down cards at the moment both cards simultaneously became playable.\"",
+      "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards. The overarching strategy is to uncover the card on the columns that has the most potential to reveal more cards to be played. Tie-break: when two cards are available to play with the same number of face-down cards above them, playing either gives the same prospect, so I select the column that has been \"least productive\" relative to its initial potential productivity (the face-down cards it started with). This simplifies to \"the playable card on the left-most column with the same (highest) number of face-down cards at the moment both cards simultaneously became playable.\" Late in the game, a column still holding many face-down cards (e.g. 5 on g) becomes worrisome, and uncovering it can outweigh the regular prescribed play (e.g. 4♥h over 3♠g, against home_pace): the \"anecdotal\" evidence is that most games I've lost seem to have the most unplayed face-down cards. At that stage it is partly gut feel.",
       "factors": [],
       "status": "adopted",
       "source": "proposed in play, 2026-11-15",
@@ -17,6 +17,11 @@
         {
           "name": "Uncover the most hidden",
           "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards. The overarching strategy is to uncover the card on the columns that has the most potential to reveal more cards to be played.",
+          "until": "2026-11-16"
+        },
+        {
+          "name": "Uncover the most hidden",
+          "definition": "My normal goal is to uncover face-down cards on the column with the most face-down cards. The overarching strategy is to uncover the card on the columns that has the most potential to reveal more cards to be played. Tie-break: when two cards are available to play with the same number of face-down cards above them, playing either gives the same prospect, so I select the column that has been \"least productive\" relative to its initial potential productivity (the face-down cards it started with). This simplifies to \"the playable card on the left-most column with the same (highest) number of face-down cards at the moment both cards simultaneously became playable.\"",
           "until": "2026-11-16"
         }
       ]
@@ -342,10 +347,17 @@
     {
       "code": "in_the_hole",
       "name": "Known play in the hole",
-      "definition": "A play I hold in reserve (e.g. 4♥h), as long as play is moving, like having a \"known play\" in the hole to use when no other more advantageous plays are available. At some point it gets into gut-feel territory. In some ways it's the inverse of tableau_first, but less well defined.",
+      "definition": "A play I hold in reserve (e.g. 4♥h), as long as play is moving, like having a \"known play\" in the hole to use when no other more advantageous plays are available. At some point it gets into gut-feel territory. In some ways it's the inverse of tableau_first, but less well defined. To remind myself that I have a play in the hole that will open a column to accept a king (e.g. 5♥g emptying f), I keep a mental note of it by saying to myself \"Red 5.\" If a red 5 becomes playable from another column or the waste pile, I don't automatically play it: I reevaluate the game state to be sure playing it offers a clear advantage over hedging to keep the play for a king available.",
       "factors": [],
       "status": "adopted",
-      "source": "proposed in play, 2026-11-16"
+      "source": "proposed in play, 2026-11-16",
+      "history": [
+        {
+          "name": "Known play in the hole",
+          "definition": "A play I hold in reserve (e.g. 4♥h), as long as play is moving, like having a \"known play\" in the hole to use when no other more advantageous plays are available. At some point it gets into gut-feel territory. In some ways it's the inverse of tableau_first, but less well defined.",
+          "until": "2026-11-16"
+        }
+      ]
     },
     {
       "code": "hedge_play",
