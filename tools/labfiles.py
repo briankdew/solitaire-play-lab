@@ -173,6 +173,8 @@ def play_fact(view, key):
             if c.get("down"):
                 return "reveals", True
             # keep_options: emptying a column is worth it only with a king ready to fill it.
+            if dest == "h":   # a play home is always useful (direct_home), even when it empties a column
+                return f"empties {LETTERS[i]}", True
             return (f"empties {LETTERS[i]}", True) if king_ready(view, i) else (f"empties {LETTERS[i]}: no king", False)
         freed = up[k - 1]
         home_ok = freed[0] == "A" or any(h and h[1] == freed[1] and RANKS.index(h[0]) + 1 == RANKS.index(freed[0])

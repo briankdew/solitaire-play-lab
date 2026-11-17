@@ -16,6 +16,8 @@ class PlayFacts(unittest.TestCase):
         self.assertEqual(L.play_fact(VIEW, "4Sf"), ("w", True))
         self.assertEqual(L.play_fact(VIEW, "4Db"), ("reveals", True))
         self.assertEqual(L.play_fact(VIEW, "8De"), ("empties d: no king", False))   # keep_options: no king ready
+        ace_alone = dict(VIEW, cols=VIEW["cols"][:3] + [{"down": 0, "up": ["AS"]}] + VIEW["cols"][4:])
+        self.assertEqual(L.play_fact(ace_alone, "ASh"), ("empties d", True))   # home is always useful
         with_king = dict(VIEW, waste=["5D", "6C", "KH"])
         self.assertEqual(L.play_fact(with_king, "8De"), ("empties d", True))
         self.assertEqual(L.play_fact(VIEW, "s"), ("", False))
